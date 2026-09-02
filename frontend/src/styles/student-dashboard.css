@@ -1,0 +1,655 @@
+/* ============================================================
+   PLACEMENTAI - STUDENT DASHBOARD
+   ============================================================ */
+
+
+/* ============================================================
+   DASHBOARD PAGE
+   ============================================================ */
+
+.dashboard-page {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px;
+    box-sizing: border-box;
+}
+
+
+/* ============================================================
+   DASHBOARD HEADER
+   ============================================================ */
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 32px;
+
+    margin-bottom: 36px;
+    padding: 32px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+
+.dashboard-eyebrow {
+    margin: 0 0 8px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    color: #6366f1;
+
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+
+.dashboard-header h1 {
+    margin: 0 0 10px;
+
+    font-size: 32px;
+    line-height: 1.2;
+
+    color: #111827;
+}
+
+
+.dashboard-header > div:first-child p:last-child {
+    margin: 0;
+
+    max-width: 650px;
+
+    font-size: 15px;
+    line-height: 1.6;
+
+    color: #6b7280;
+}
+
+
+/* ============================================================
+   DASHBOARD ACTIONS
+   ============================================================ */
+
+.dashboard-actions {
+    display: flex;
+    gap: 12px;
+
+    flex-shrink: 0;
+}
+
+
+.dashboard-actions button {
+    padding: 12px 18px;
+
+    border: none;
+    border-radius: 10px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+
+.dashboard-actions button:first-child {
+    background: #4f46e5;
+    color: #ffffff;
+}
+
+
+.dashboard-actions button:last-child {
+    background: #eef2ff;
+    color: #4338ca;
+}
+
+
+.dashboard-actions button:hover {
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 5px 12px rgba(0, 0, 0, 0.08);
+}
+
+
+/* ============================================================
+   DASHBOARD SECTION
+   ============================================================ */
+
+.dashboard-section {
+    margin-bottom: 32px;
+}
+
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 18px;
+}
+
+
+.section-header h2 {
+    margin: 0 0 5px;
+
+    font-size: 22px;
+    font-weight: 700;
+
+    color: #111827;
+}
+
+
+.section-header p {
+    margin: 0;
+
+    font-size: 14px;
+
+    color: #6b7280;
+}
+
+
+/* ============================================================
+   STATISTICS GRID
+   ============================================================ */
+
+.stats-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 18px;
+}
+
+
+/* ============================================================
+   STAT CARD
+   ============================================================ */
+
+.stat-card {
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+
+    padding: 22px;
+
+    min-height: 130px;
+
+    box-sizing: border-box;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+
+.stat-card:hover {
+    transform: translateY(-2px);
+
+    border-color: #c7d2fe;
+
+    box-shadow:
+        0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+
+.stat-card-content {
+    display: flex;
+    flex-direction: column;
+}
+
+
+.stat-card-title {
+    margin: 0 0 12px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    color: #6b7280;
+}
+
+
+.stat-card-value {
+    margin: 0 0 6px;
+
+    font-size: 30px;
+    font-weight: 700;
+
+    color: #111827;
+}
+
+
+.stat-card-description {
+    margin: 0;
+
+    font-size: 13px;
+
+    color: #9ca3af;
+}
+
+
+/* ============================================================
+   APPLICATION LIST
+   ============================================================ */
+
+.applications-list {
+    display: flex;
+    flex-direction: column;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+
+    overflow: hidden;
+}
+
+
+.application-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 20px;
+
+    padding: 20px 22px;
+
+    border-bottom: 1px solid #f0f1f3;
+
+    transition: background 0.2s ease;
+}
+
+
+.application-item:last-child {
+    border-bottom: none;
+}
+
+
+.application-item:hover {
+    background: #f9fafb;
+}
+
+
+.application-item h3 {
+    margin: 0 0 6px;
+
+    font-size: 16px;
+    font-weight: 650;
+
+    color: #111827;
+}
+
+
+.application-item p {
+    margin: 0 0 5px;
+
+    font-size: 14px;
+
+    color: #4b5563;
+}
+
+
+.application-item span:not(.status) {
+    font-size: 13px;
+
+    color: #9ca3af;
+}
+
+
+/* ============================================================
+   APPLICATION STATUS
+   ============================================================ */
+
+.status {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 6px 11px;
+
+    border-radius: 999px;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    white-space: nowrap;
+
+    background: #f3f4f6;
+    color: #374151;
+}
+
+
+.status-applied {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+
+.status-shortlisted {
+    background: #f0fdf4;
+    color: #16a34a;
+}
+
+
+.status-interview-scheduled {
+    background: #f5f3ff;
+    color: #7c3aed;
+}
+
+
+.status-rejected {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+
+.status-hired {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+
+/* ============================================================
+   INTERVIEW LIST
+   ============================================================ */
+
+.interviews-list {
+    display: flex;
+    flex-direction: column;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+
+    overflow: hidden;
+}
+
+
+.interview-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 20px;
+
+    padding: 20px 22px;
+
+    border-bottom: 1px solid #f0f1f3;
+}
+
+
+.interview-item:last-child {
+    border-bottom: none;
+}
+
+
+.interview-item h3 {
+    margin: 0 0 7px;
+
+    font-size: 16px;
+
+    color: #111827;
+}
+
+
+.interview-item p {
+    margin: 0;
+
+    font-size: 14px;
+
+    color: #6b7280;
+}
+
+
+.interview-item > div:last-child {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+
+.interview-item span {
+    padding: 6px 10px;
+
+    border-radius: 999px;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    background: #f3f4f6;
+    color: #374151;
+}
+
+
+.interview-item a {
+    padding: 9px 14px;
+
+    border-radius: 9px;
+
+    background: #4f46e5;
+
+    color: #ffffff;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    text-decoration: none;
+
+    transition: background 0.2s ease;
+}
+
+
+.interview-item a:hover {
+    background: #4338ca;
+}
+
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+
+.empty-state {
+    padding: 36px;
+
+    text-align: center;
+
+    background: #ffffff;
+
+    border: 1px dashed #d1d5db;
+    border-radius: 16px;
+}
+
+
+.empty-state p {
+    margin: 0 0 18px;
+
+    font-size: 14px;
+
+    color: #6b7280;
+}
+
+
+.empty-state button {
+    padding: 10px 16px;
+
+    border: none;
+    border-radius: 9px;
+
+    background: #4f46e5;
+
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+/* ============================================================
+   LOADING
+   ============================================================ */
+
+.dashboard-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 400px;
+
+    text-align: center;
+}
+
+
+.dashboard-loading h2 {
+    margin-bottom: 8px;
+
+    color: #111827;
+}
+
+
+.dashboard-loading p {
+    margin: 0;
+
+    color: #6b7280;
+}
+
+
+/* ============================================================
+   ERROR
+   ============================================================ */
+
+.dashboard-error {
+    padding: 40px;
+
+    text-align: center;
+
+    background: #ffffff;
+
+    border: 1px solid #fecaca;
+    border-radius: 16px;
+}
+
+
+.dashboard-error h2 {
+    margin: 0 0 10px;
+
+    color: #b91c1c;
+}
+
+
+.dashboard-error p {
+    margin: 0 0 20px;
+
+    color: #6b7280;
+}
+
+
+.dashboard-error button {
+    padding: 10px 18px;
+
+    border: none;
+    border-radius: 9px;
+
+    background: #dc2626;
+
+    color: #ffffff;
+
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+/* ============================================================
+   RESPONSIVE - TABLET
+   ============================================================ */
+
+@media (max-width: 1000px) {
+
+    .dashboard-page {
+        padding: 24px;
+    }
+
+
+    .dashboard-header {
+        flex-direction: column;
+    }
+
+
+    .dashboard-actions {
+        width: 100%;
+    }
+
+
+    .dashboard-actions button {
+        flex: 1;
+    }
+
+
+    .stats-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+}
+
+
+/* ============================================================
+   RESPONSIVE - MOBILE
+   ============================================================ */
+
+@media (max-width: 650px) {
+
+    .dashboard-page {
+        padding: 16px;
+    }
+
+
+    .dashboard-header {
+        padding: 22px;
+    }
+
+
+    .dashboard-header h1 {
+        font-size: 26px;
+    }
+
+
+    .dashboard-actions {
+        flex-direction: column;
+    }
+
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .application-item,
+    .interview-item {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+
+    .interview-item > div:last-child {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
