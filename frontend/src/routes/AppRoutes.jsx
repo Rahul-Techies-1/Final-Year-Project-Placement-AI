@@ -60,7 +60,11 @@ import RecruiterJobs
 import RecruiterDashboard
     from "../pages/recruiter/RecruiterDashboard";
 
+import SQLPreparation
+    from "../pages/student/preparation/SQLPreparation";
 
+import CoreCSPreparation
+    from "../pages/student/preparation/CoreCSPreparation";
 
 
 
@@ -88,27 +92,7 @@ function Home() {
 }
 
 
-// ========================================================
-// RECRUITER DASHBOARD
-// ========================================================
 
-function RecruiterDashboard() {
-
-    return (
-
-        <div>
-
-            <h1>
-                Recruiter Dashboard
-            </h1>
-
-            <p>
-                Recruiter dashboard coming soon.
-            </p>
-
-        </div>
-    );
-}
 
 
 // ========================================================
@@ -260,6 +244,22 @@ function AppRoutes() {
                         path="/student/preparation/dsa"
                         element={
                             <DSAPreparation />
+                        }
+                    />
+
+                    {/* ==================================================
+                        SQL PREPARATION
+                    ================================================== */}
+                    <Route
+                        path="/student/preparation/sql"
+                        element={
+                            <SQLPreparation />
+                        }
+                    />
+                    <Route
+                        path="/student/preparation/core-cs"
+                        element={
+                            <CoreCSPreparation />
                         }
                     />
 

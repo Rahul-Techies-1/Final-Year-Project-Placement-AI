@@ -16,6 +16,13 @@ from app.routers.student_dashboard_router import (
 from app.routers.recruiter_dashboard_router import (
     router as recruiter_dashboard_router
 )
+from app.routers.preparation_router import (
+    router as preparation_router
+)
+from app.routers.sql_router import (
+    router as sql_router
+)
+from app.routers.core_cs_router import router as core_cs_router
 
 app = FastAPI(
     title="PlacementAI API",
@@ -39,6 +46,11 @@ app.include_router(student_dashboard_router)
 app.include_router(
     recruiter_dashboard_router
 )
+app.include_router(
+    preparation_router
+)
+app.include_router(sql_router)
+app.include_router(core_cs_router)
 
 @app.get("/")
 def root():

@@ -1,71 +1,217 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+import {
+    getDSAOverview,
+    getDSATopics,
+    getDSAProblems,
+    updateDSAProgress
+} from "../../../services/preparationService";
 
 
 function DSAPreparation() {
 
-    const [selectedTopic, setSelectedTopic] = useState("All");
+    const [selectedTopic, setSelectedTopic] =
+        useState(null);
+
+    const [topics, setTopics] =
+        useState([]);
+
+    const [problems, setProblems] =
+        useState([]);
+
+    const [progress, setProgress] =
+        useState({
+            total_problems: 0,
+            completed_problems: 0,
+            remaining_problems: 0,
+            progress_percentage: 0
+        });
+
+    const [loading, setLoading] =
+        useState(true);
+
+    const [error, setError] =
+        useState("");
+
+    const [updatingProblemId, setUpdatingProblemId] =
+        useState(null);
 
 
-    const topics = [
-        "All",
-        "Arrays",
-        "Strings",
-        "Linked List",
-        "Stack",
-        "Queue",
-        "Trees",
-        "Graphs",
-        "Dynamic Programming"
-    ];
+    // ========================================================
+    // LOAD DSA DATA
+    // ========================================================
+
+    useEffect(() => {
+
+        loadDSAData();
+
+    }, [selectedTopic]);
 
 
-    const problems = [
-        {
-            id: 1,
-            title: "Two Sum",
-            topic: "Arrays",
-            difficulty: "Easy",
-            completed: false
-        },
-        {
-            id: 2,
-            title: "Best Time to Buy and Sell Stock",
-            topic: "Arrays",
-            difficulty: "Easy",
-            completed: false
-        },
-        {
-            id: 3,
-            title: "Valid Parentheses",
-            topic: "Stack",
-            difficulty: "Easy",
-            completed: false
-        },
-        {
-            id: 4,
-            title: "Reverse Linked List",
-            topic: "Linked List",
-            difficulty: "Easy",
-            completed: false
-        },
-        {
-            id: 5,
-            title: "Binary Tree Inorder Traversal",
-            topic: "Trees",
-            difficulty: "Medium",
-            completed: false
-        }
-    ];
+    const loadDSAData = async () => {
+
+        try {
+
+            setLoading(true);
+            setError("");
+
+            const [
+                overviewData,
+                topicsData,
+                problemsData
+            ] = await Promise.all([
+
+                getDSAOverview(),
+
+                getDSATopics(),
+
+                getDSAProblems({
+                    topicId: selectedTopic
+                })
+
+            ]);
 
 
-    const filteredProblems =
-        selectedTopic === "All"
-            ? problems
-            : problems.filter(
-                (problem) =>
-                    problem.topic === selectedTopic
+            setProgress(
+                overviewData.progress
             );
 
+            setTopics(
+                topicsData
+            );
+
+            setProblems(
+                problemsData.items
+            );
+
+        } catch (err) {
+
+            console.error(
+                "Failed to load DSA data:",
+                err
+            );
+
+            setError(
+                err.response?.data?.detail ||
+                "Failed to load DSA preparation data."
+            );
+
+        } finally {
+
+            setLoading(false);
+
+        }
+    };
+
+
+    // ========================================================
+    // UPDATE PROBLEM PROGRESS
+    // ========================================================
+
+    const handleProgressChange = async (
+        problemId,
+        completed
+    ) => {
+
+        try {
+
+            setUpdatingProblemId(
+                problemId
+            );
+
+            setError("");
+
+
+            const updatedProgress =
+                await updateDSAProgress(
+                    problemId,
+                    completed
+                );
+
+
+            // Update problem locally
+            setProblems(
+                (currentProblems) =>
+                    currentProblems.map(
+                        (problem) =>
+                            problem.id === problemId
+                                ? {
+                                    ...problem,
+                                    completed:
+                                        updatedProgress.completed,
+                                    completed_at:
+                                        updatedProgress.completed_at
+                                }
+                                : problem
+                    )
+            );
+
+
+            // Reload overview so overall progress
+            // always comes from backend
+            const overview =
+                await getDSAOverview();
+
+            setProgress(
+                overview.progress
+            );
+
+        } catch (err) {
+
+            console.error(
+                "Failed to update DSA progress:",
+                err
+            );
+
+            setError(
+                err.response?.data?.detail ||
+                "Failed to update problem progress."
+            );
+
+        } finally {
+
+            setUpdatingProblemId(
+                null
+            );
+
+        }
+    };
+
+
+    // ========================================================
+    // LOADING
+    // ========================================================
+
+    if (loading) {
+
+        return (
+
+            <div className="dsa-preparation">
+
+                <div className="page-header">
+
+                    <div>
+
+                        <h1>
+                            DSA Preparation
+                        </h1>
+
+                        <p>
+                            Loading your DSA preparation...
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+        );
+    }
+
+
+    // ========================================================
+    // RENDER
+    // ========================================================
 
     return (
 
@@ -95,6 +241,23 @@ function DSAPreparation() {
 
 
             {/* ==================================================
+                ERROR
+            ================================================== */}
+
+            {error && (
+
+                <div className="error-state">
+
+                    <p>
+                        {error}
+                    </p>
+
+                </div>
+
+            )}
+
+
+            {/* ==================================================
                 PROGRESS
             ================================================== */}
 
@@ -107,24 +270,38 @@ function DSAPreparation() {
                     </p>
 
                     <h2>
-                        0%
+                        {progress.progress_percentage}%
                     </h2>
 
                     <p>
-                        0 of {problems.length} problems completed
+                        {progress.completed_problems} of{" "}
+                        {progress.total_problems} problems completed
                     </p>
 
                 </div>
 
 
-                <div className="progress-bar">
+                <div>
 
                     <div
-                        className="progress-bar-fill"
-                        style={{
-                            width: "0%"
-                        }}
-                    />
+                        className="progress-bar"
+                        role="progressbar"
+                        aria-valuenow={
+                            progress.progress_percentage
+                        }
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                    >
+
+                        <div
+                            className="progress-bar-fill"
+                            style={{
+                                width:
+                                    `${progress.progress_percentage}%`
+                            }}
+                        />
+
+                    </div>
 
                 </div>
 
@@ -156,22 +333,44 @@ function DSAPreparation() {
 
                 <div className="topic-list">
 
+
+                    {/* ALL */}
+
+                    <button
+                        type="button"
+                        className={
+                            selectedTopic === null
+                                ? "topic-button active"
+                                : "topic-button"
+                        }
+                        onClick={() =>
+                            setSelectedTopic(null)
+                        }
+                    >
+                        All
+                    </button>
+
+
+                    {/* BACKEND TOPICS */}
+
                     {topics.map(
                         (topic) => (
 
                             <button
-                                key={topic}
+                                key={topic.id}
                                 type="button"
                                 className={
-                                    selectedTopic === topic
+                                    selectedTopic === topic.id
                                         ? "topic-button active"
                                         : "topic-button"
                                 }
                                 onClick={() =>
-                                    setSelectedTopic(topic)
+                                    setSelectedTopic(
+                                        topic.id
+                                    )
                                 }
                             >
-                                {topic}
+                                {topic.name}
                             </button>
 
                         )
@@ -205,50 +404,103 @@ function DSAPreparation() {
                 </div>
 
 
-                <div className="problems-list">
+                {problems.length === 0 ? (
 
-                    {filteredProblems.map(
-                        (problem) => (
+                    <div className="empty-state">
 
-                            <div
-                                className="problem-card"
-                                key={problem.id}
-                            >
+                        <p>
+                            No DSA problems available for
+                            this topic.
+                        </p>
 
-                                <div>
+                    </div>
 
-                                    <h3>
-                                        {problem.title}
-                                    </h3>
+                ) : (
 
-                                    <p>
-                                        {problem.topic}
-                                    </p>
+                    <div className="problems-list">
+
+                        {problems.map(
+                            (problem) => (
+
+                                <div
+                                    className="problem-card"
+                                    key={problem.id}
+                                >
+
+
+                                    {/* PROBLEM INFO */}
+
+                                    <div>
+
+                                        <h3>
+                                            {problem.title}
+                                        </h3>
+
+                                        <p>
+                                            {problem.description}
+                                        </p>
+
+                                    </div>
+
+
+                                    {/* PROBLEM ACTIONS */}
+
+                                    <div>
+
+                                        <span>
+                                            {problem.difficulty}
+                                        </span>
+
+
+                                        {problem.external_url && (
+
+                                            <a
+                                                href={
+                                                    problem.external_url
+                                                }
+                                                target="_blank"
+                                                rel="noreferrer"
+                                            >
+                                                Open Problem
+                                            </a>
+
+                                        )}
+
+
+                                        <button
+                                            type="button"
+                                            disabled={
+                                                updatingProblemId ===
+                                                problem.id
+                                            }
+                                            onClick={() =>
+                                                handleProgressChange(
+                                                    problem.id,
+                                                    !problem.completed
+                                                )
+                                            }
+                                        >
+
+                                            {updatingProblemId ===
+                                            problem.id
+                                                ? "Updating..."
+                                                : problem.completed
+                                                    ? "Mark Incomplete"
+                                                    : "Mark Complete"
+                                            }
+
+                                        </button>
+
+                                    </div>
 
                                 </div>
 
+                            )
+                        )}
 
-                                <div>
+                    </div>
 
-                                    <span>
-                                        {problem.difficulty}
-                                    </span>
-
-
-                                    <button
-                                        type="button"
-                                    >
-                                        Start Problem
-                                    </button>
-
-                                </div>
-
-                            </div>
-
-                        )
-                    )}
-
-                </div>
+                )}
 
             </section>
 

@@ -1,9 +1,33 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+import PreparationService from "../../services/PreparationService";
+import {
+    getSQLOverview
+} from "../../services/sqlService";
 
 
 function PreparationDashboard() {
 
     const navigate = useNavigate();
+
+    const [dsaProgress, setDsaProgress] = useState({
+        total_problems: 0,
+        completed_problems: 0,
+        remaining_problems: 0,
+        progress_percentage: 0
+    });
+
+    const [sqlProgress, setSqlProgress] = useState({
+        total_problems: 0,
+        completed_problems: 0,
+        remaining_problems: 0,
+        progress_percentage: 0
+    });
+
+    const [loading, setLoading] = useState(true);
+
+    const [error, setError] = useState("");
 
 
     // ========================================================
@@ -16,7 +40,7 @@ function PreparationDashboard() {
             title: "DSA",
             description:
                 "Practice data structures and algorithms for coding rounds.",
-            progress: 0,
+            progress: dsaProgress.progress_percentage,
             path: "/student/preparation/dsa"
         },
 
@@ -24,7 +48,7 @@ function PreparationDashboard() {
             title: "SQL",
             description:
                 "Improve SQL and database skills for placement interviews.",
-            progress: 0,
+            progress: sqlProgress.progress_percentage,
             path: "/student/preparation/sql"
         },
 
@@ -63,6 +87,117 @@ function PreparationDashboard() {
     ];
 
 
+    // ========================================================
+    // LOAD PREPARATION DATA
+    // ========================================================
+
+    useEffect(() => {
+
+        loadPreparationData();
+
+    }, []);
+
+
+    const loadPreparationData = async () => {
+
+        try {
+
+            setLoading(true);
+
+            setError("");
+
+
+            // ------------------------------------------------
+            // Load DSA + SQL progress together
+            // ------------------------------------------------
+
+            const [
+                dsaResponse,
+                sqlResponse
+            ] = await Promise.all([
+
+                PreparationService.getDSAOverview(),
+
+                getSQLOverview()
+
+            ]);
+
+
+            // ------------------------------------------------
+            // Set DSA progress
+            // ------------------------------------------------
+
+            if (dsaResponse?.progress) {
+
+                setDsaProgress(
+                    dsaResponse.progress
+                );
+
+            }
+
+
+            // ------------------------------------------------
+            // Set SQL progress
+            // ------------------------------------------------
+
+            if (sqlResponse?.progress) {
+
+                setSqlProgress(
+                    sqlResponse.progress
+                );
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Failed to load preparation data:",
+                error
+            );
+
+            setError(
+                "Unable to load preparation progress."
+            );
+
+        } finally {
+
+            setLoading(false);
+
+        }
+
+    };
+
+
+    // ========================================================
+    // OVERALL PREPARATION PROGRESS
+    // ========================================================
+
+    /*
+        Currently DSA and SQL are implemented.
+
+        Therefore overall preparation progress
+        is calculated using the average of:
+
+        DSA progress
+        SQL progress
+
+        Later we will include:
+
+        Core CS
+        Aptitude
+        Mock Interviews
+        AI Mentor
+    */
+
+    const overallProgress =
+        Math.round(
+            (
+                dsaProgress.progress_percentage +
+                sqlProgress.progress_percentage
+            ) / 2
+        );
+
+
     return (
 
         <div className="preparation-dashboard">
@@ -91,6 +226,30 @@ function PreparationDashboard() {
 
 
             {/* ==================================================
+                ERROR
+            ================================================== */}
+
+            {error && (
+
+                <div className="error-state">
+
+                    <p>
+                        {error}
+                    </p>
+
+                    <button
+                        type="button"
+                        onClick={loadPreparationData}
+                    >
+                        Retry
+                    </button>
+
+                </div>
+
+            )}
+
+
+            {/* ==================================================
                 OVERALL PROGRESS
             ================================================== */}
 
@@ -103,12 +262,17 @@ function PreparationDashboard() {
                     </p>
 
                     <h2>
-                        0%
+                        {loading
+                            ? "..."
+                            : `${overallProgress}%`
+                        }
                     </h2>
 
                     <p>
-                        Start preparing to build your placement
-                        readiness.
+                        {loading
+                            ? "Loading preparation progress..."
+                            : "Based on your current preparation activity."
+                        }
                     </p>
 
                 </div>
@@ -119,7 +283,9 @@ function PreparationDashboard() {
                     <div
                         className="progress-bar"
                         role="progressbar"
-                        aria-valuenow="0"
+                        aria-valuenow={
+                            overallProgress
+                        }
                         aria-valuemin="0"
                         aria-valuemax="100"
                     >
@@ -127,7 +293,8 @@ function PreparationDashboard() {
                         <div
                             className="progress-bar-fill"
                             style={{
-                                width: "0%"
+                                width:
+                                    `${overallProgress}%`
                             }}
                         />
 
