@@ -2,14 +2,24 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import PreparationService from "../../services/PreparationService";
+
 import {
     getSQLOverview
 } from "../../services/sqlService";
+
+import {
+    getAptitudeOverview
+} from "../../services/aptitudeService";
 
 
 function PreparationDashboard() {
 
     const navigate = useNavigate();
+
+
+    // ========================================================
+    // DSA PROGRESS
+    // ========================================================
 
     const [dsaProgress, setDsaProgress] = useState({
         total_problems: 0,
@@ -18,12 +28,30 @@ function PreparationDashboard() {
         progress_percentage: 0
     });
 
+
+    // ========================================================
+    // SQL PROGRESS
+    // ========================================================
+
     const [sqlProgress, setSqlProgress] = useState({
         total_problems: 0,
         completed_problems: 0,
         remaining_problems: 0,
         progress_percentage: 0
     });
+
+
+    // ========================================================
+    // APTITUDE PROGRESS
+    // ========================================================
+
+    const [aptitudeProgress, setAptitudeProgress] = useState({
+        total_questions: 0,
+        completed_questions: 0,
+        remaining_questions: 0,
+        progress_percentage: 0
+    });
+
 
     const [loading, setLoading] = useState(true);
 
@@ -38,50 +66,82 @@ function PreparationDashboard() {
 
         {
             title: "DSA",
+
             description:
                 "Practice data structures and algorithms for coding rounds.",
-            progress: dsaProgress.progress_percentage,
-            path: "/student/preparation/dsa"
+
+            progress:
+                dsaProgress.progress_percentage,
+
+            path:
+                "/student/preparation/dsa"
         },
+
 
         {
             title: "SQL",
+
             description:
                 "Improve SQL and database skills for placement interviews.",
-            progress: sqlProgress.progress_percentage,
-            path: "/student/preparation/sql"
+
+            progress:
+                sqlProgress.progress_percentage,
+
+            path:
+                "/student/preparation/sql"
         },
+
 
         {
             title: "Core CS",
+
             description:
                 "Prepare DBMS, OS, Computer Networks and OOP concepts.",
+
             progress: 0,
-            path: "/student/preparation/core-cs"
+
+            path:
+                "/student/preparation/core-cs"
         },
+
 
         {
             title: "Aptitude",
+
             description:
                 "Practice quantitative, logical and verbal aptitude.",
-            progress: 0,
-            path: "/student/preparation/aptitude"
+
+            progress:
+                aptitudeProgress.progress_percentage,
+
+            path:
+                "/student/preparation/aptitude"
         },
+
 
         {
             title: "Mock Interviews",
+
             description:
                 "Practice technical and placement interviews.",
+
             progress: 0,
-            path: "/student/preparation/interviews"
+
+            path:
+                "/student/preparation/mock-interviews"
         },
+
 
         {
             title: "PDF / AI Mentor",
+
             description:
                 "Upload study material and ask questions using AI.",
+
             progress: 0,
-            path: "/student/preparation/ai-mentor"
+
+            path:
+                "/student/preparation/ai-mentor"
         }
 
     ];
@@ -108,17 +168,20 @@ function PreparationDashboard() {
 
 
             // ------------------------------------------------
-            // Load DSA + SQL progress together
+            // Load DSA + SQL + Aptitude progress together
             // ------------------------------------------------
 
             const [
                 dsaResponse,
-                sqlResponse
+                sqlResponse,
+                aptitudeResponse
             ] = await Promise.all([
 
                 PreparationService.getDSAOverview(),
 
-                getSQLOverview()
+                getSQLOverview(),
+
+                getAptitudeOverview()
 
             ]);
 
@@ -148,6 +211,19 @@ function PreparationDashboard() {
 
             }
 
+
+            // ------------------------------------------------
+            // Set Aptitude progress
+            // ------------------------------------------------
+
+            if (aptitudeResponse?.progress) {
+
+                setAptitudeProgress(
+                    aptitudeResponse.progress
+                );
+
+            }
+
         } catch (error) {
 
             console.error(
@@ -173,18 +249,18 @@ function PreparationDashboard() {
     // ========================================================
 
     /*
-        Currently DSA and SQL are implemented.
+        Currently implemented modules:
 
-        Therefore overall preparation progress
-        is calculated using the average of:
+        DSA
+        SQL
+        Aptitude
 
-        DSA progress
-        SQL progress
+        Overall preparation progress is calculated
+        using the average progress of these modules.
 
         Later we will include:
 
         Core CS
-        Aptitude
         Mock Interviews
         AI Mentor
     */
@@ -193,8 +269,9 @@ function PreparationDashboard() {
         Math.round(
             (
                 dsaProgress.progress_percentage +
-                sqlProgress.progress_percentage
-            ) / 2
+                sqlProgress.progress_percentage +
+                aptitudeProgress.progress_percentage
+            ) / 3
         );
 
 

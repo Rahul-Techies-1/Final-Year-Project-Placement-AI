@@ -1,7 +1,24 @@
-from sqlalchemy import Boolean, ForeignKey, Integer, String, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from typing import TYPE_CHECKING, List
+
+from sqlalchemy import (
+    Boolean,
+    ForeignKey,
+    Integer,
+    String,
+    Text
+)
+from sqlalchemy.orm import (
+    Mapped,
+    mapped_column,
+    relationship
+)
 
 from app.database.base import Base
+
+
+if TYPE_CHECKING:
+    from app.models.core_cs_topic import CoreCSTopic
+    from app.models.core_cs_progress import CoreCSProgress
 
 
 class CoreCSProblem(Base):
@@ -47,4 +64,23 @@ class CoreCSProblem(Base):
         Boolean,
         nullable=False,
         default=True
+    )
+
+    # ========================================================
+    # RELATIONSHIP WITH CORE CS TOPIC
+    # ========================================================
+
+    topic: Mapped["CoreCSTopic"] = relationship(
+        "CoreCSTopic",
+        back_populates="problems"
+    )
+
+    # ========================================================
+    # RELATIONSHIP WITH CORE CS PROGRESS
+    # ========================================================
+
+    progress: Mapped[List["CoreCSProgress"]] = relationship(
+        "CoreCSProgress",
+        back_populates="problem",
+        cascade="all, delete-orphan"
     )

@@ -11,12 +11,12 @@ from app.database.base import Base
 
 
 if TYPE_CHECKING:
-    from app.models.core_cs_problem import CoreCSProblem
+    from app.models.aptitude_question import AptitudeQuestion
 
 
-class CoreCSTopic(Base):
+class AptitudeTopic(Base):
 
-    __tablename__ = "core_cs_topics"
+    __tablename__ = "aptitude_topics"
 
     id: Mapped[int] = mapped_column(
         Integer,
@@ -41,12 +41,8 @@ class CoreCSTopic(Base):
         default=0
     )
 
-    # ========================================================
-    # RELATIONSHIP WITH CORE CS PROBLEMS
-    # ========================================================
-
-    problems: Mapped[List["CoreCSProblem"]] = relationship(
-        "CoreCSProblem",
+    questions: Mapped[List["AptitudeQuestion"]] = relationship(
+        "AptitudeQuestion",
         back_populates="topic",
         cascade="all, delete-orphan"
     )

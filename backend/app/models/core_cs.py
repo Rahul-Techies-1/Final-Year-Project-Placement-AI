@@ -1,112 +1,23 @@
-from typing import List
+"""
+Core CS model compatibility module.
 
-from sqlalchemy import (
-    Boolean,
-    ForeignKey,
-    String,
-    Text
-)
+The actual Core CS SQLAlchemy models are defined in:
 
-from sqlalchemy.orm import (
-    Mapped,
-    mapped_column,
-    relationship
-)
+- core_cs_topic.py
+- core_cs_problem.py
+- core_cs_progress.py
 
-from app.database.base import Base
+This file re-exports them so existing imports such as:
 
+    from app.models.core_cs import CoreCSTopic, CoreCSProblem
 
-# ============================================================
-# CORE CS TOPIC
-# ============================================================
+continue to work without creating duplicate SQLAlchemy models.
+"""
 
-class CoreCSTopic(Base):
+from app.models.core_cs_topic import CoreCSTopic
+from app.models.core_cs_problem import CoreCSProblem
 
-    __tablename__ = "core_cs_topics"
-
-    id: Mapped[int] = mapped_column(
-        primary_key=True,
-        index=True
-    )
-
-    name: Mapped[str] = mapped_column(
-        String(100),
-        unique=True,
-        nullable=False
-    )
-
-    description: Mapped[str | None] = mapped_column(
-        Text,
-        nullable=True
-    )
-
-    display_order: Mapped[int] = mapped_column(
-        nullable=False,
-        default=0
-    )
-
-    problems: Mapped[List["CoreCSProblem"]] = relationship(
-        "CoreCSProblem",
-        back_populates="topic",
-        cascade="all, delete-orphan"
-    )
-
-
-# ============================================================
-# CORE CS PROBLEM
-# ============================================================
-
-class CoreCSProblem(Base):
-
-    __tablename__ = "core_cs_problems"
-
-    id: Mapped[int] = mapped_column(
-        primary_key=True,
-        index=True
-    )
-
-    topic_id: Mapped[int] = mapped_column(
-        ForeignKey(
-            "core_cs_topics.id",
-            ondelete="CASCADE"
-        ),
-        nullable=False,
-        index=True
-    )
-
-    title: Mapped[str] = mapped_column(
-        String(200),
-        nullable=False
-    )
-
-    description: Mapped[str] = mapped_column(
-        Text,
-        nullable=False
-    )
-
-    difficulty: Mapped[str] = mapped_column(
-        String(20),
-        nullable=False
-    )
-
-    external_url: Mapped[str | None] = mapped_column(
-        Text,
-        nullable=True
-    )
-
-    is_active: Mapped[bool] = mapped_column(
-        Boolean,
-        nullable=False,
-        default=True
-    )
-
-    topic: Mapped["CoreCSTopic"] = relationship(
-        "CoreCSTopic",
-        back_populates="problems"
-    )
-
-    progress: Mapped[List["CoreCSProgress"]] = relationship(
-        "CoreCSProgress",
-        back_populates="problem",
-        cascade="all, delete-orphan"
-    )
+__all__ = [
+    "CoreCSTopic",
+    "CoreCSProblem",
+]

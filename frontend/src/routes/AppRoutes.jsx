@@ -29,12 +29,23 @@ import StudentLayout from "../components/common/StudentLayout";
 // STUDENT PAGES
 // ========================================================
 
-import StudentDashboard from "../pages/student/StudentDashboard";
-import Jobs from "../pages/student/Jobs";
-import JobDetails from "../pages/student/JobDetails";
-import ApplyJob from "../pages/student/ApplyJob";
-import MyApplications from "../pages/student/MyApplications";
-import ApplicationDetails from "../pages/student/ApplicationDetails";
+import StudentDashboard
+    from "../pages/student/StudentDashboard";
+
+import Jobs
+    from "../pages/student/Jobs";
+
+import JobDetails
+    from "../pages/student/JobDetails";
+
+import ApplyJob
+    from "../pages/student/ApplyJob";
+
+import MyApplications
+    from "../pages/student/MyApplications";
+
+import ApplicationDetails
+    from "../pages/student/ApplicationDetails";
 
 import PreparationDashboard
     from "../pages/student/PreparationDashboard";
@@ -42,8 +53,28 @@ import PreparationDashboard
 import DSAPreparation
     from "../pages/student/preparation/DSAPreparation";
 
+import SQLPreparation
+    from "../pages/student/preparation/SQLPreparation";
+
+import CoreCSPreparation
+    from "../pages/student/preparation/CoreCSPreparation";
+
+import MockInterviews
+    from "../pages/student/preparation/MockInterviews";
+
 import Interviews
     from "../pages/student/Interviews";
+
+import MockInterviewSession
+    from "../pages/student/preparation/MockInterviewSession";
+
+import MockInterviewResults
+    from "../pages/student/preparation/MockInterviewResults";
+
+
+// ========================================================
+// RECRUITER PAGES
+// ========================================================
 
 import RecruiterInterviews
     from "../pages/recruiter/RecruiterInterviews";
@@ -59,14 +90,6 @@ import RecruiterJobs
 
 import RecruiterDashboard
     from "../pages/recruiter/RecruiterDashboard";
-
-import SQLPreparation
-    from "../pages/student/preparation/SQLPreparation";
-
-import CoreCSPreparation
-    from "../pages/student/preparation/CoreCSPreparation";
-
-
 
 
 // ========================================================
@@ -90,9 +113,6 @@ function Home() {
         </div>
     );
 }
-
-
-
 
 
 // ========================================================
@@ -133,7 +153,9 @@ function AppRoutes() {
                 }
             >
 
-                {/* Student Layout */}
+                {/* ==================================================
+                    STUDENT LAYOUT
+                ================================================== */}
 
                 <Route
                     element={<StudentLayout />}
@@ -247,19 +269,53 @@ function AppRoutes() {
                         }
                     />
 
+
                     {/* ==================================================
                         SQL PREPARATION
                     ================================================== */}
+
                     <Route
                         path="/student/preparation/sql"
                         element={
                             <SQLPreparation />
                         }
                     />
+
+
+                    {/* ==================================================
+                        CORE CS PREPARATION
+                    ================================================== */}
+
                     <Route
                         path="/student/preparation/core-cs"
                         element={
                             <CoreCSPreparation />
+                        }
+                    />
+
+
+                    {/* ==================================================
+                        MOCK INTERVIEWS
+                    ================================================== */}
+
+                    <Route
+                        path="/student/preparation/mock-interviews"
+                        element={
+                            <MockInterviews />
+                        }
+                    />
+
+                    <Route
+                        path="/student/preparation/mock-interviews/:interviewId/results"
+                        element={
+                            <MockInterviewResults />
+                        }
+                    />
+
+                    <Route
+                        path="/student/preparation/mock-interviews/:interviewId"
+                        element={
+                            <MockInterviewSession />
                         }
                     />
 
@@ -287,31 +343,38 @@ function AppRoutes() {
                         <RecruiterDashboard />
                     }
                 />
+
+
                 <Route
                     path="/recruiter/jobs"
                     element={
                         <RecruiterJobs />
                     }
                 />
+
+
                 <Route
                     path="/recruiter/jobs/:jobId/applications"
                     element={
                         <RecruiterApplications />
                     }
                 />
+
+
                 <Route
                     path="/recruiter/interviews"
                     element={
                         <RecruiterInterviews />
                     }
                 />
+
+
                 <Route
                     path="/recruiter/interviews/schedule"
                     element={
                         <ScheduleInterview />
                     }
                 />
-                
 
             </Route>
 
