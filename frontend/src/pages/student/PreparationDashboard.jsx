@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import PreparationService from "../../services/PreparationService";
+import { getDSAOverview } from "../../services/PreparationService";
 
 import {
     getSQLOverview
@@ -10,6 +10,14 @@ import {
 import {
     getAptitudeOverview
 } from "../../services/aptitudeService";
+
+import {
+    getCoreCSOverview
+} from "../../services/coreCSService";
+
+import {
+    getMockInterviewAnalytics
+} from "../../services/mockInterviewService";
 
 
 function PreparationDashboard() {
@@ -52,6 +60,43 @@ function PreparationDashboard() {
         progress_percentage: 0
     });
 
+
+    // ========================================================
+    // CORE CS PROGRESS
+    // ========================================================
+
+    const [coreCSProgress, setCoreCSProgress] = useState({
+        total_questions: 0,
+        completed_questions: 0,
+        remaining_questions: 0,
+        progress_percentage: 0
+    });
+
+
+    // ========================================================
+    // MOCK INTERVIEW ANALYTICS
+    // ========================================================
+
+    const [mockInterviewAnalytics, setMockInterviewAnalytics] =
+        useState({
+            total_interviews: 0,
+            completed_interviews: 0,
+            in_progress_interviews: 0,
+            average_score: null,
+            best_score: null,
+            total_questions: 0,
+            total_questions_answered: 0,
+            answer_rate: 0,
+            completion_rate: 0,
+            technical_average_score: null,
+            hr_average_score: null,
+            recent_interviews: []
+        });
+
+
+    // ========================================================
+    // LOADING & ERROR
+    // ========================================================
 
     const [loading, setLoading] = useState(true);
 
@@ -98,7 +143,8 @@ function PreparationDashboard() {
             description:
                 "Prepare DBMS, OS, Computer Networks and OOP concepts.",
 
-            progress: 0,
+            progress:
+                coreCSProgress.progress_percentage,
 
             path:
                 "/student/preparation/core-cs"
@@ -125,12 +171,17 @@ function PreparationDashboard() {
             description:
                 "Practice technical and placement interviews.",
 
-            progress: 0,
+            progress:
+                mockInterviewAnalytics.completion_rate,
 
             path:
                 "/student/preparation/mock-interviews"
         },
 
+
+        // ====================================================
+        // AI MENTOR
+        // ====================================================
 
         {
             title: "PDF / AI Mentor",
@@ -168,20 +219,26 @@ function PreparationDashboard() {
 
 
             // ------------------------------------------------
-            // Load DSA + SQL + Aptitude progress together
+            // Load all preparation data together
             // ------------------------------------------------
 
             const [
                 dsaResponse,
                 sqlResponse,
-                aptitudeResponse
+                aptitudeResponse,
+                coreCSResponse,
+                mockInterviewResponse
             ] = await Promise.all([
 
-                PreparationService.getDSAOverview(),
+                getDSAOverview(),
 
                 getSQLOverview(),
 
-                getAptitudeOverview()
+                getAptitudeOverview(),
+
+                getCoreCSOverview(),
+
+                getMockInterviewAnalytics()
 
             ]);
 
@@ -224,6 +281,32 @@ function PreparationDashboard() {
 
             }
 
+
+            // ------------------------------------------------
+            // Set Core CS progress
+            // ------------------------------------------------
+
+            if (coreCSResponse?.progress) {
+
+                setCoreCSProgress(
+                    coreCSResponse.progress
+                );
+
+            }
+
+
+            // ------------------------------------------------
+            // Set Mock Interview analytics
+            // ------------------------------------------------
+
+            if (mockInterviewResponse) {
+
+                setMockInterviewAnalytics(
+                    mockInterviewResponse
+                );
+
+            }
+
         } catch (error) {
 
             console.error(
@@ -232,6 +315,7 @@ function PreparationDashboard() {
             );
 
             setError(
+                error.response?.data?.detail ||
                 "Unable to load preparation progress."
             );
 
@@ -249,31 +333,47 @@ function PreparationDashboard() {
     // ========================================================
 
     /*
-        Currently implemented modules:
+        Overall preparation progress is calculated
+        from the modules for which measurable progress
+        is currently available.
+
+        Current modules:
 
         DSA
         SQL
-        Aptitude
-
-        Overall preparation progress is calculated
-        using the average progress of these modules.
-
-        Later we will include:
-
         Core CS
+        Aptitude
         Mock Interviews
-        AI Mentor
     */
+
+    const progressValues = [
+
+        dsaProgress.progress_percentage,
+
+        sqlProgress.progress_percentage,
+
+        coreCSProgress.progress_percentage,
+
+        aptitudeProgress.progress_percentage,
+
+        mockInterviewAnalytics.completion_rate
+
+    ];
+
 
     const overallProgress =
         Math.round(
-            (
-                dsaProgress.progress_percentage +
-                sqlProgress.progress_percentage +
-                aptitudeProgress.progress_percentage
-            ) / 3
+            progressValues.reduce(
+                (total, value) =>
+                    total + (Number(value) || 0),
+                0
+            ) / progressValues.length
         );
 
+
+    // ========================================================
+    // DASHBOARD
+    // ========================================================
 
     return (
 
@@ -470,9 +570,72 @@ function PreparationDashboard() {
                                 </button>
 
                             </div>
-
                         )
                     )}
+
+                </div>
+
+            </section>
+
+
+            {/* ==================================================
+                MOCK INTERVIEW SUMMARY
+            ================================================== */}
+
+            <section className="readiness-section">
+
+                <h2>
+                    Mock Interview Performance
+                </h2>
+
+                <p>
+                    Track your interview practice and
+                    performance.
+                </p>
+
+
+                <div>
+
+                    <strong>
+                        Average Score
+                    </strong>
+
+                    <h2>
+                        {mockInterviewAnalytics.average_score !== null
+                            ? `${mockInterviewAnalytics.average_score}%`
+                            : "—"
+                        }
+                    </h2>
+
+                </div>
+
+
+                <div>
+
+                    <strong>
+                        Interviews Completed
+                    </strong>
+
+                    <h2>
+                        {
+                            mockInterviewAnalytics.completed_interviews
+                        }
+                    </h2>
+
+                </div>
+
+
+                <div>
+
+                    <strong>
+                        Questions Answered
+                    </strong>
+
+                    <h2>
+                        {
+                            mockInterviewAnalytics.total_questions_answered
+                        }
+                    </h2>
 
                 </div>
 
@@ -490,20 +653,22 @@ function PreparationDashboard() {
                 </h2>
 
                 <p>
-                    Your readiness score will be calculated from
-                    your activity across DSA, SQL, Core CS,
-                    Aptitude, interviews and other preparation
-                    activities.
+                    Your readiness score is based on your
+                    preparation activity across DSA, SQL,
+                    Core CS, Aptitude and Mock Interviews.
                 </p>
 
                 <div>
 
                     <strong>
-                        Readiness Score
+                        Current Readiness Score
                     </strong>
 
                     <h2>
-                        Not calculated yet
+                        {loading
+                            ? "..."
+                            : `${overallProgress}%`
+                        }
                     </h2>
 
                 </div>

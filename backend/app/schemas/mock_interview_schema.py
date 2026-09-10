@@ -195,7 +195,7 @@ class MockInterviewPerformanceAnalyticsResponse(BaseModel):
 
     average_score: int | None = None
 
-    best_score: int | None = None
+    highest_score: int | None = None
 
     total_questions: int
 

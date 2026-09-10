@@ -1,6 +1,7 @@
 import {
     Routes,
-    Route
+    Route,
+    Navigate
 } from "react-router-dom";
 
 
@@ -91,6 +92,8 @@ import RecruiterJobs
 import RecruiterDashboard
     from "../pages/recruiter/RecruiterDashboard";
 
+import AIMentor from "../pages/student/preparation/AIMentor";
+
 
 // ========================================================
 // HOME
@@ -132,7 +135,12 @@ function AppRoutes() {
 
             <Route
                 path="/"
-                element={<Home />}
+                element={
+                    <Navigate
+                        to="/login"
+                        replace
+                    />
+                }
             />
 
             <Route
@@ -316,6 +324,13 @@ function AppRoutes() {
                         path="/student/preparation/mock-interviews/:interviewId"
                         element={
                             <MockInterviewSession />
+                        }
+                    />
+
+                    <Route
+                        path="/student/preparation/ai-mentor"
+                        element={
+                            <AIMentor />
                         }
                     />
 

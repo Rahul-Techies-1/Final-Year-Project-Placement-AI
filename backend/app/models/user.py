@@ -132,3 +132,15 @@ class User(Base):
         back_populates="user",
         cascade="all, delete-orphan"
     )
+
+    ai_documents = relationship(
+        "AIDocument",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
+
+    ai_chat_sessions = relationship(
+        "AIChatSession",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )

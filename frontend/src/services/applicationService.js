@@ -1,6 +1,24 @@
 import api from "../api/axios";
 
 
+
+// ========================================================
+// STUDENT - APPLY FOR JOB
+// ========================================================
+
+export const applyForJob = async (jobId) => {
+
+    const response = await api.post(
+        "/applications",
+        {
+            job_id: Number(jobId)
+        }
+    );
+
+    return response.data;
+};
+
+
 // ========================================================
 // GET MY APPLICATIONS
 // ========================================================

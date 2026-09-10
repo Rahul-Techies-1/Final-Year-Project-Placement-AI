@@ -98,6 +98,41 @@ class StudentPaginatedApplicationsResponse(BaseModel):
 
 
 # ============================================================
+# MOCK INTERVIEW PERFORMANCE ANALYTICS
+# ============================================================
+
+# ============================================================
+# MOCK INTERVIEW PERFORMANCE ANALYTICS
+# ============================================================
+
+class MockInterviewPerformanceAnalyticsResponse(BaseModel):
+
+    total_interviews: int
+
+    completed_interviews: int
+
+    in_progress_interviews: int
+
+    average_score: float | None = None
+
+    best_score: float | None = None
+
+    total_questions: int
+
+    total_questions_answered: int
+
+    answer_rate: int
+
+    completion_rate: int
+
+    technical_average_score: float | None = None
+
+    hr_average_score: float | None = None
+
+    recent_interviews: list = []
+
+
+# ============================================================
 # COMPLETE STUDENT DASHBOARD OVERVIEW
 # ============================================================
 
@@ -112,3 +147,7 @@ class StudentDashboardOverviewResponse(BaseModel):
     upcoming_interviews: list[
         StudentUpcomingInterviewResponse
     ]
+
+    mock_interview_analytics: (
+        MockInterviewPerformanceAnalyticsResponse
+    )

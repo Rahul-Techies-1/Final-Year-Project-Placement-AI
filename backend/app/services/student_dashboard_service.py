@@ -9,6 +9,10 @@ from app.repositories.interview_repository import (
     interview_repository
 )
 
+from app.services.mock_interview_service import (
+    mock_interview_service
+)
+
 
 class StudentDashboardService:
 
@@ -99,16 +103,19 @@ class StudentDashboardService:
     ):
 
         if page < 1:
+
             raise ValueError(
                 "Page must be greater than or equal to 1."
             )
 
         if limit < 1:
+
             raise ValueError(
                 "Limit must be greater than or equal to 1."
             )
 
         if limit > 20:
+
             raise ValueError(
                 "Limit cannot be greater than 20."
             )
@@ -134,12 +141,24 @@ class StudentDashboardService:
         for application in applications:
 
             items.append({
-                "application_id": application.id,
-                "job_id": application.job_id,
-                "job_title": application.job.title,
-                "company": application.job.company,
-                "location": application.job.location,
-                "status": application.status
+
+                "application_id":
+                    application.id,
+
+                "job_id":
+                    application.job_id,
+
+                "job_title":
+                    application.job.title,
+
+                "company":
+                    application.job.company,
+
+                "location":
+                    application.job.location,
+
+                "status":
+                    application.status
             })
 
         total_pages = (
@@ -149,11 +168,21 @@ class StudentDashboardService:
         )
 
         return {
-            "items": items,
-            "page": page,
-            "limit": limit,
-            "total": total,
-            "total_pages": total_pages
+
+            "items":
+                items,
+
+            "page":
+                page,
+
+            "limit":
+                limit,
+
+            "total":
+                total,
+
+            "total_pages":
+                total_pages
         }
 
     # ========================================================
@@ -168,11 +197,13 @@ class StudentDashboardService:
     ):
 
         if limit < 1:
+
             raise ValueError(
                 "Limit must be greater than or equal to 1."
             )
 
         if limit > 20:
+
             raise ValueError(
                 "Limit cannot be greater than 20."
             )
@@ -190,15 +221,45 @@ class StudentDashboardService:
         for interview in interviews:
 
             result.append({
-                "interview_id": interview.id,
-                "application_id": interview.application_id,
-                "scheduled_at": interview.scheduled_at,
-                "interview_type": interview.interview_type,
-                "meeting_link": interview.meeting_link,
-                "status": interview.status
+
+                "interview_id":
+                    interview.id,
+
+                "application_id":
+                    interview.application_id,
+
+                "scheduled_at":
+                    interview.scheduled_at,
+
+                "interview_type":
+                    interview.interview_type,
+
+                "meeting_link":
+                    interview.meeting_link,
+
+                "status":
+                    interview.status
             })
 
         return result
+
+    # ========================================================
+    # STUDENT - MOCK INTERVIEW PERFORMANCE ANALYTICS
+    # ========================================================
+
+    def get_mock_interview_analytics(
+        self,
+        db: Session,
+        student_id: int
+    ):
+
+        return (
+            mock_interview_service
+            .get_performance_analytics(
+                db=db,
+                user_id=student_id
+            )
+        )
 
     # ========================================================
     # STUDENT - COMPLETE DASHBOARD OVERVIEW
@@ -210,12 +271,20 @@ class StudentDashboardService:
         student_id: int
     ):
 
+        # ----------------------------------------------------
+        # Dashboard statistics
+        # ----------------------------------------------------
+
         statistics = (
             self.get_student_dashboard(
                 db,
                 student_id
             )
         )
+
+        # ----------------------------------------------------
+        # Recent applications
+        # ----------------------------------------------------
 
         recent_applications = (
             self.get_recent_applications(
@@ -226,6 +295,10 @@ class StudentDashboardService:
             )["items"]
         )
 
+        # ----------------------------------------------------
+        # Upcoming interviews
+        # ----------------------------------------------------
+
         upcoming_interviews = (
             self.get_upcoming_interviews(
                 db,
@@ -234,11 +307,39 @@ class StudentDashboardService:
             )
         )
 
+        # ----------------------------------------------------
+        # Mock interview analytics
+        # ----------------------------------------------------
+
+        mock_interview_analytics = (
+            mock_interview_service.get_performance_analytics(
+                db=db,
+                user_id=student_id
+            )
+        )
+
+        # ----------------------------------------------------
+        # Complete dashboard response
+        # ----------------------------------------------------
+
         return {
-            "statistics": statistics,
-            "recent_applications": recent_applications,
-            "upcoming_interviews": upcoming_interviews
+
+            "statistics":
+                statistics,
+
+            "recent_applications":
+                recent_applications,
+
+            "upcoming_interviews":
+                upcoming_interviews,
+
+            "mock_interview_analytics":
+                mock_interview_analytics
         }
 
+
+# ============================================================
+# SERVICE INSTANCE
+# ============================================================
 
 student_dashboard_service = StudentDashboardService()

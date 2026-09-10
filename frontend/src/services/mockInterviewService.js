@@ -146,16 +146,18 @@ export const deleteMockInterview = async (
     );
 };
 
-// ========================================================
-// GET MOCK INTERVIEW BY ID
-// ========================================================
 
-export const getMockInterviewById = async (
-    interviewId
-) => {
+
+
+
+// ============================================================
+// GET MOCK INTERVIEW ANALYTICS
+// ============================================================
+
+export const getMockInterviewAnalytics = async () => {
 
     const response = await api.get(
-        `/preparation/mock-interviews/${interviewId}`
+        "/preparation/mock-interviews/analytics"
     );
 
     return response.data;

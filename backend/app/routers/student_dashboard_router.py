@@ -85,7 +85,9 @@ def get_recent_applications(
 
 @router.get(
     "/dashboard/upcoming-interviews",
-    response_model=list[StudentUpcomingInterviewResponse]
+    response_model=list[
+        StudentUpcomingInterviewResponse
+    ]
 )
 def get_upcoming_interviews(
     limit: int = 5,
@@ -133,7 +135,19 @@ def get_dashboard_overview(
     )
 ):
 
-    return student_dashboard_service.get_dashboard_overview(
-        db,
-        current_user.id
-    )
+    try:
+
+        return (
+            student_dashboard_service
+            .get_dashboard_overview(
+                db,
+                current_user.id
+            )
+        )
+
+    except ValueError as e:
+
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )

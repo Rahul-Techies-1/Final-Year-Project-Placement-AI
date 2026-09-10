@@ -35,3 +35,12 @@ from .aptitude_topic import AptitudeTopic
 from .aptitude_question import AptitudeQuestion
 
 from .aptitude_progress import AptitudeProgress
+
+from .mock_interview import MockInterview
+
+from .mock_interview_question import MockInterviewQuestion
+
+from .ai_document import AIDocument
+
+from .ai_chat_session import AIChatSession
+from .ai_chat_message import AIChatMessage

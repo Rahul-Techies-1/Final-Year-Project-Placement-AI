@@ -4,8 +4,11 @@ import { useNavigate } from "react-router-dom";
 import {
     createMockInterview,
     getMockInterviews,
-    deleteMockInterview
+    deleteMockInterview,
+    getMockInterviewAnalytics
 } from "../../../services/mockInterviewService";
+
+import MockInterviewAnalytics from "../../../components/dashboard/MockInterviewAnalytics";
 
 
 const MockInterviews = () => {
@@ -24,6 +27,10 @@ const MockInterviews = () => {
     const [creating, setCreating] = useState(false);
 
     const [error, setError] = useState("");
+
+    const [analytics, setAnalytics] = useState(null);
+
+    const [analyticsLoading, setAnalyticsLoading] = useState(true);
 
 
     const [interviewType, setInterviewType] =
@@ -53,32 +60,37 @@ const MockInterviews = () => {
 
             setLoading(true);
 
+            setAnalyticsLoading(true);
+
             setError("");
 
-            const data =
-                await getMockInterviews();
+            const[
+                interviewsResponse,
+                analyticsResponse
+            ]= await Promise.all([
+                getMockInterviews(),
 
+                getMockInterviewAnalytics()
+            ]);
             setInterviews(
-                data?.items || []
+                analyticsResponse || null
             );
-
-        } catch (err) {
-
+        }catch (err){
             console.error(
                 "Failed to load mock interviews:",
                 err
             );
-
             setError(
+                err?.response?.data?.detail ||
                 "Failed to load mock interviews."
             );
-
         } finally {
-
             setLoading(false);
 
+            setAnalyticsLoading(false);
         }
     };
+
 
 
     // ========================================================
@@ -261,6 +273,18 @@ const MockInterviews = () => {
         ).length;
 
 
+    {/* ==================================================
+    MOCK INTERVIEW ANALYTICS
+    ================================================== */}
+
+    {!analyticsLoading && (
+        <MockInterviewAnalytics
+            analytics={analytics}
+
+        />
+    )}
+
+
     // ========================================================
     // LOADING
     // ========================================================
@@ -398,6 +422,14 @@ const MockInterviews = () => {
                 </div>
 
             </section>
+
+            {/* ==================================================
+                MOCK INTERVIEW ANALYTICS
+            ================================================== */}
+
+            {!analyticsLoading &&(
+                <MockInterviewAnalytics analytics={analytics} />
+            )}
 
 
             {/* ==================================================

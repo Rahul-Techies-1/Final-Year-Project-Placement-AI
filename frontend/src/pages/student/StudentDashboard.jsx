@@ -10,6 +10,8 @@ import {
 import ApplicationOverview from "../../components/dashboard/ApplicationOverview";
 import RecentApplications from "../../components/dashboard/RecentApplications";
 import UpcomingInterviews from "../../components/dashboard/UpcomingInterviews";
+import MockInterviewAnalytics
+    from "../../components/dashboard/MockInterviewAnalytics";
 
 
 function StudentDashboard() {
@@ -151,6 +153,9 @@ function StudentDashboard() {
     const upcomingInterviews =
         dashboard.upcoming_interviews || [];
 
+    const mockInterviewAnalytics =
+        dashboard.mock_interview_analytics || null;
+
 
     // ========================================================
     // NORMALIZE INTERVIEW COUNT
@@ -266,6 +271,13 @@ function StudentDashboard() {
 
             <UpcomingInterviews
                 interviews={upcomingInterviews}
+            />
+
+            {/* =================================================
+                MOCK INTERVIEW ANALYTICS
+            ================================================= */}
+            <MockInterviewAnalytics
+                analytics={mockInterviewAnalytics}
             />
 
 
