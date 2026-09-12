@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 
 import { getAvailableJobs } from "../../services/jobService";
 
+import "./Jobs.css";
+
 
 function Jobs() {
 
@@ -36,7 +38,9 @@ function Jobs() {
     // ========================================================
 
     const fetchJobs = async (
-        currentPage = page
+        currentPage = 1,
+        searchValue = search,
+        locationValue = location
     ) => {
 
         setLoading(true);
@@ -45,14 +49,20 @@ function Jobs() {
         try {
 
             const data = await getAvailableJobs({
+
                 page: currentPage,
+
                 limit,
-                search: search.trim()
+
+                search: searchValue.trim(),
+
+                location: locationValue.trim()
+
             });
 
 
             // ------------------------------------------------
-            // Backend currently returns a list
+            // BACKEND MAY RETURN ARRAY
             // ------------------------------------------------
 
             if (Array.isArray(data)) {
@@ -87,13 +97,14 @@ function Jobs() {
             setJobs([]);
 
             setError(
-                error.response?.data?.detail ||
+                error?.response?.data?.detail ||
                 "Failed to load available jobs. Please try again."
             );
 
         } finally {
 
             setLoading(false);
+
         }
     };
 
@@ -104,7 +115,7 @@ function Jobs() {
 
     useEffect(() => {
 
-        fetchJobs(1);
+        fetchJobs(1, "", "");
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
 
@@ -121,7 +132,11 @@ function Jobs() {
 
         setPage(1);
 
-        fetchJobs(1);
+        fetchJobs(
+            1,
+            search,
+            location
+        );
     };
 
 
@@ -137,66 +152,11 @@ function Jobs() {
 
         setPage(1);
 
-        // Fetch without filters
-        fetchJobsWithoutFilters();
-    };
-
-
-    const fetchJobsWithoutFilters = async () => {
-
-        setLoading(true);
-        setError("");
-
-        try {
-
-            const data = await getAvailableJobs({
-                page: 1,
-                limit,
-                search: "",
-                location: ""
-            });
-
-
-            if (Array.isArray(data)) {
-
-                setJobs(data);
-
-                setHasMore(
-                    data.length === limit
-                );
-
-            } else {
-
-                setJobs(
-                    data?.items ||
-                    data?.jobs ||
-                    []
-                );
-
-                setHasMore(
-                    data?.has_more ??
-                    false
-                );
-            }
-
-        } catch (error) {
-
-            console.error(
-                "Failed to fetch available jobs:",
-                error
-            );
-
-            setJobs([]);
-
-            setError(
-                error.response?.data?.detail ||
-                "Failed to load jobs. Please try again."
-            );
-
-        } finally {
-
-            setLoading(false);
-        }
+        fetchJobs(
+            1,
+            "",
+            ""
+        );
     };
 
 
@@ -214,7 +174,11 @@ function Jobs() {
 
         setPage(nextPage);
 
-        fetchJobs(nextPage);
+        fetchJobs(
+            nextPage,
+            search,
+            location
+        );
     };
 
 
@@ -232,7 +196,11 @@ function Jobs() {
 
         setPage(previousPage);
 
-        fetchJobs(previousPage);
+        fetchJobs(
+            previousPage,
+            search,
+            location
+        );
     };
 
 
@@ -242,7 +210,11 @@ function Jobs() {
 
     const handleRetry = () => {
 
-        fetchJobs(page);
+        fetchJobs(
+            page,
+            search,
+            location
+        );
     };
 
 
@@ -259,7 +231,48 @@ function Jobs() {
 
 
     // ========================================================
-    // UI
+    // FORMAT JOB TYPE
+    // ========================================================
+
+    const formatJobType = (jobType) => {
+
+        if (!jobType) {
+            return "Full Time";
+        }
+
+        return jobType
+            .replaceAll("_", " ")
+            .replace(
+                /\b\w/g,
+                (character) =>
+                    character.toUpperCase()
+            );
+    };
+
+
+    // ========================================================
+    // FORMAT DATE
+    // ========================================================
+
+    const formatDate = (date) => {
+
+        if (!date) {
+            return null;
+        }
+
+        return new Date(date).toLocaleDateString(
+            "en-IN",
+            {
+                day: "numeric",
+                month: "short",
+                year: "numeric"
+            }
+        );
+    };
+
+
+    // ========================================================
+    // RENDER
     // ========================================================
 
     return (
@@ -271,111 +284,199 @@ function Jobs() {
                 PAGE HEADER
             ================================================== */}
 
-            <div className="jobs-header">
+            <header className="jobs-page-header">
 
                 <div>
+
+                    <div className="jobs-eyebrow">
+
+                        <span className="jobs-eyebrow-icon">
+                            💼
+                        </span>
+
+                        CAREER OPPORTUNITIES
+
+                    </div>
+
 
                     <h1>
-                        Available Jobs
+                        Find your next
+                        <span>
+                            opportunity.
+                        </span>
                     </h1>
 
+
                     <p>
-                        Explore placement opportunities and find
-                        the right job for you.
+                        Explore placement opportunities from
+                        companies hiring talented students.
                     </p>
 
                 </div>
 
-            </div>
+
+                <div className="jobs-header-badge">
+
+                    <span className="jobs-header-badge-icon">
+                        ✦
+                    </span>
+
+                    <div>
+
+                        <strong>
+                            Placement Ready
+                        </strong>
+
+                        <span>
+                            Discover opportunities
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </header>
 
 
             {/* ==================================================
-                SEARCH / FILTER
+                SEARCH PANEL
             ================================================== */}
 
-            <form
-                className="jobs-search-form"
-                onSubmit={handleSearch}
-            >
+            <section className="jobs-search-panel">
 
-                <div>
+                <div className="jobs-search-heading">
 
-                    <label htmlFor="job-search">
-                        Search
-                    </label>
+                    <div className="jobs-search-heading-icon">
+                        🔎
+                    </div>
 
-                    <input
-                        id="job-search"
-                        type="text"
-                        placeholder="Search by job title or company..."
-                        value={search}
-                        onChange={(event) =>
-                            setSearch(event.target.value)
-                        }
-                        disabled={loading}
-                    />
+                    <div>
 
-                </div>
+                        <h2>
+                            Search jobs
+                        </h2>
 
+                        <p>
+                            Find opportunities that match your
+                            skills and preferred location.
+                        </p>
 
-                <div>
-
-                    <label htmlFor="job-location">
-                        Location
-                    </label>
-
-                    <input
-                        id="job-location"
-                        type="text"
-                        placeholder="e.g. Delhi, Bangalore..."
-                        value={location}
-                        onChange={(event) =>
-                            setLocation(event.target.value)
-                        }
-                        disabled={loading}
-                    />
+                    </div>
 
                 </div>
 
 
-                <div className="jobs-search-actions">
-
-                    <button
-                        type="submit"
-                        disabled={loading}
-                    >
-                        Search
-                    </button>
+                <form
+                    className="jobs-search-form"
+                    onSubmit={handleSearch}
+                >
 
 
-                    <button
-                        type="button"
-                        onClick={handleClearFilters}
-                        disabled={loading}
-                    >
-                        Clear
-                    </button>
-
-                </div>
-
-            </form>
+                    {/* SEARCH */}
 
 
-            {/* ==================================================
-                LOADING
-            ================================================== */}
+                    <div className="jobs-field">
 
-            {loading && (
+                        <label htmlFor="job-search">
+                            Job title or company
+                        </label>
 
-                <div className="jobs-loading">
+                        <div className="jobs-input-wrapper">
 
-                    <p>
-                        Loading available jobs...
-                    </p>
+                            <span>
+                                🔍
+                            </span>
 
-                </div>
+                            <input
+                                id="job-search"
+                                type="text"
+                                placeholder="e.g. AI Engineer, TCS..."
+                                value={search}
+                                onChange={(event) =>
+                                    setSearch(
+                                        event.target.value
+                                    )
+                                }
+                                disabled={loading}
+                            />
 
-            )}
+                        </div>
+
+                    </div>
+
+
+                    {/* LOCATION */}
+
+
+                    <div className="jobs-field">
+
+                        <label htmlFor="job-location">
+                            Location
+                        </label>
+
+                        <div className="jobs-input-wrapper">
+
+                            <span>
+                                📍
+                            </span>
+
+                            <input
+                                id="job-location"
+                                type="text"
+                                placeholder="e.g. Delhi, Bangalore..."
+                                value={location}
+                                onChange={(event) =>
+                                    setLocation(
+                                        event.target.value
+                                    )
+                                }
+                                disabled={loading}
+                            />
+
+                        </div>
+
+                    </div>
+
+
+                    {/* ACTIONS */}
+
+
+                    <div className="jobs-search-actions">
+
+                        <button
+                            type="submit"
+                            className="jobs-search-button"
+                            disabled={loading}
+                        >
+
+                            {loading
+                                ? "Searching..."
+                                : "Search Jobs"
+                            }
+
+                            {!loading && (
+                                <span>
+                                    →
+                                </span>
+                            )}
+
+                        </button>
+
+
+                        <button
+                            type="button"
+                            className="jobs-clear-button"
+                            onClick={handleClearFilters}
+                            disabled={loading}
+                        >
+                            Clear
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </section>
 
 
             {/* ==================================================
@@ -386,9 +487,21 @@ function Jobs() {
 
                 <div className="jobs-error">
 
-                    <p>
-                        {error}
-                    </p>
+                    <div className="jobs-error-icon">
+                        !
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Unable to load jobs
+                        </strong>
+
+                        <p>
+                            {error}
+                        </p>
+
+                    </div>
 
                     <button
                         type="button"
@@ -396,6 +509,93 @@ function Jobs() {
                     >
                         Try Again
                     </button>
+
+                </div>
+
+            )}
+
+
+            {/* ==================================================
+                RESULTS HEADER
+            ================================================== */}
+
+            {!error && (
+
+                <div className="jobs-results-header">
+
+                    <div>
+
+                        <h2>
+                            Available Jobs
+                        </h2>
+
+                        <p>
+                            {loading
+                                ? "Finding the best opportunities for you..."
+                                : `${jobs.length} opportunit${jobs.length === 1 ? "y" : "ies"} available`
+                            }
+                        </p>
+
+                    </div>
+
+
+                    {!loading && jobs.length > 0 && (
+
+                        <div className="jobs-page-indicator">
+
+                            Page {page}
+
+                        </div>
+
+                    )}
+
+                </div>
+
+            )}
+
+
+            {/* ==================================================
+                LOADING
+            ================================================== */}
+
+            {loading && (
+
+                <div className="jobs-loading-grid">
+
+                    {[1, 2, 3].map(
+                        (item) => (
+
+                            <div
+                                className="job-skeleton-card"
+                                key={item}
+                            >
+
+                                <div className="job-skeleton-header">
+
+                                    <div className="job-skeleton-logo" />
+
+                                    <div className="job-skeleton-lines">
+
+                                        <div />
+                                        <div />
+
+                                    </div>
+
+                                </div>
+
+
+                                <div className="job-skeleton-title" />
+
+                                <div className="job-skeleton-description" />
+
+                                <div className="job-skeleton-description short" />
+
+                                <div className="job-skeleton-footer" />
+
+                            </div>
+
+                        )
+                    )}
 
                 </div>
 
@@ -412,12 +612,16 @@ function Jobs() {
 
                     <div className="jobs-empty-state">
 
+                        <div className="jobs-empty-icon">
+                            🔎
+                        </div>
+
                         <h2>
                             No jobs found
                         </h2>
 
                         <p>
-                            There are currently no available jobs
+                            We couldn't find any opportunities
                             matching your search.
                         </p>
 
@@ -426,6 +630,9 @@ function Jobs() {
                             onClick={handleClearFilters}
                         >
                             View All Jobs
+                            <span>
+                                →
+                            </span>
                         </button>
 
                     </div>
@@ -443,92 +650,209 @@ function Jobs() {
 
                     <div className="jobs-list">
 
-                        {jobs.map((job) => (
+                        {jobs.map(
+                            (job) => (
 
-                            <article
-                                className="job-card"
-                                key={job.id}
-                            >
-
-                                <div className="job-card-content">
-
-
-                                    {/* JOB TITLE */}
-
-                                    <h2>
-                                        {job.title}
-                                    </h2>
+                                <article
+                                    className="job-card"
+                                    key={job.id}
+                                >
 
 
-                                    {/* COMPANY */}
-
-                                    <p>
-                                        <strong>
-                                            Company:
-                                        </strong>{" "}
-                                        {job.company || "Not specified"}
-                                    </p>
+                                    {/* JOB CARD TOP */}
 
 
-                                    {/* LOCATION */}
+                                    <div className="job-card-top">
 
-                                    <p>
-                                        <strong>
-                                            Location:
-                                        </strong>{" "}
-                                        {job.location || "Not specified"}
-                                    </p>
+                                        <div className="job-company-logo">
+
+                                            {job.company
+                                                ?.charAt(0)
+                                                ?.toUpperCase() || "C"
+                                            }
+
+                                        </div>
+
+
+                                        <div className="job-card-heading">
+
+                                            <h3>
+                                                {job.title}
+                                            </h3>
+
+                                            <p>
+                                                {job.company ||
+                                                    "Company not specified"
+                                                }
+                                            </p>
+
+                                        </div>
+
+
+                                        {job.job_type && (
+
+                                            <span className="job-type-badge">
+
+                                                {formatJobType(
+                                                    job.job_type
+                                                )}
+
+                                            </span>
+
+                                        )}
+
+                                    </div>
+
+
+                                    {/* JOB META */}
+
+
+                                    <div className="job-meta">
+
+                                        <span>
+                                            <span className="job-meta-icon">
+                                                📍
+                                            </span>
+
+                                            {job.location ||
+                                                "Location not specified"
+                                            }
+
+                                        </span>
+
+
+                                        {job.experience && (
+
+                                            <span>
+                                                <span className="job-meta-icon">
+                                                    ◉
+                                                </span>
+
+                                                {job.experience}
+
+                                            </span>
+
+                                        )}
+
+
+                                        {job.salary && (
+
+                                            <span>
+                                                <span className="job-meta-icon">
+                                                    ₹
+                                                </span>
+
+                                                {job.salary}
+
+                                            </span>
+
+                                        )}
+
+                                    </div>
 
 
                                     {/* DESCRIPTION */}
 
+
                                     {job.description && (
 
-                                        <p>
+                                        <p className="job-description">
+
                                             {job.description.length > 180
                                                 ? `${job.description.substring(
                                                     0,
                                                     180
                                                 )}...`
-                                                : job.description}
+                                                : job.description
+                                            }
+
                                         </p>
 
                                     )}
 
 
-                                    {/* JOB TYPE */}
-
-                                    {job.job_type && (
-
-                                        <span>
-                                            {job.job_type}
-                                        </span>
-
-                                    )}
-
-                                </div>
+                                    {/* SKILLS */}
 
 
-                                {/* ACTION */}
+                                    {Array.isArray(job.skills) &&
+                                        job.skills.length > 0 && (
 
-                                <div className="job-card-actions">
+                                            <div className="job-skills">
 
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            handleViewDetails(
-                                                job.id
-                                            )
-                                        }
-                                    >
-                                        View Details
-                                    </button>
+                                                {job.skills
+                                                    .slice(0, 4)
+                                                    .map(
+                                                        (skill) => (
 
-                                </div>
+                                                            <span
+                                                                key={skill}
+                                                            >
+                                                                {skill}
+                                                            </span>
 
-                            </article>
+                                                        )
+                                                    )}
 
-                        ))}
+                                                {job.skills.length > 4 && (
+
+                                                    <span>
+                                                        +{job.skills.length - 4}
+                                                    </span>
+
+                                                )}
+
+                                            </div>
+
+                                        )}
+
+
+                                    {/* CARD FOOTER */}
+
+
+                                    <div className="job-card-footer">
+
+                                        <div>
+
+                                            {job.created_at && (
+
+                                                <span className="job-posted-date">
+
+                                                    Posted{" "}
+                                                    {formatDate(
+                                                        job.created_at
+                                                    )}
+
+                                                </span>
+
+                                            )}
+
+                                        </div>
+
+
+                                        <button
+                                            type="button"
+                                            className="job-details-button"
+                                            onClick={() =>
+                                                handleViewDetails(
+                                                    job.id
+                                                )
+                                            }
+                                        >
+
+                                            View Details
+
+                                            <span>
+                                                →
+                                            </span>
+
+                                        </button>
+
+                                    </div>
+
+                                </article>
+
+                            )
+                        )}
 
                     </div>
 
@@ -553,13 +877,26 @@ function Jobs() {
                                 loading
                             }
                         >
-                            Previous
+
+                            ←
+                            <span>
+                                Previous
+                            </span>
+
                         </button>
 
 
-                        <span>
-                            Page {page}
-                        </span>
+                        <div className="jobs-pagination-current">
+
+                            <span>
+                                Page
+                            </span>
+
+                            <strong>
+                                {page}
+                            </strong>
+
+                        </div>
 
 
                         <button
@@ -570,7 +907,13 @@ function Jobs() {
                                 loading
                             }
                         >
-                            Next
+
+                            <span>
+                                Next
+                            </span>
+
+                            →
+
                         </button>
 
                     </div>

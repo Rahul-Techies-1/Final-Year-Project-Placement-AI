@@ -73,6 +73,9 @@ const MockInterviews = () => {
                 getMockInterviewAnalytics()
             ]);
             setInterviews(
+                interviewsResponse || []
+            );
+            setAnalytics(
                 analyticsResponse || null
             );
         }catch (err){
@@ -277,12 +280,6 @@ const MockInterviews = () => {
     MOCK INTERVIEW ANALYTICS
     ================================================== */}
 
-    {!analyticsLoading && (
-        <MockInterviewAnalytics
-            analytics={analytics}
-
-        />
-    )}
 
 
     // ========================================================
