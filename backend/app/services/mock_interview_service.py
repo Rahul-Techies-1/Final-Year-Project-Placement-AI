@@ -107,16 +107,39 @@ class MockInterviewService:
             )
 
         # ----------------------------------------------------
-        # Validate requested question count
+        # Determine actual question count
+        #
+        # If the student requests more questions than are
+        # currently available, use all available questions.
+        #
+        # Example:
+        # Requested = 10
+        # Available = 3
+        # Actual = 3
         # ----------------------------------------------------
 
-        if total_questions > len(available_questions):
+        actual_question_count = min(
+            total_questions,
+            len(available_questions)
+        )
 
-            raise ValueError(
-                f"Only {len(available_questions)} questions "
-                f"are available for {interview_type} "
-                f"{difficulty} interviews."
-            )
+        # ----------------------------------------------------
+        # Select questions
+        #
+        # Currently sequential selection is used.
+        #
+        # Later we can add:
+        # - Random selection
+        # - AI-generated questions
+        # - Adaptive difficulty
+        # - Company-specific questions
+        # ----------------------------------------------------
+
+        selected_questions = (
+            available_questions[
+                :actual_question_count
+            ]
+        )
 
         # ----------------------------------------------------
         # Create interview
@@ -130,7 +153,9 @@ class MockInterviewService:
 
             difficulty=difficulty,
 
-            total_questions=total_questions,
+            # Store the ACTUAL number of questions that
+            # will exist in this interview.
+            total_questions=actual_question_count,
 
             questions_answered=0,
 
@@ -148,24 +173,6 @@ class MockInterviewService:
                 db,
                 interview
             )
-        )
-
-        # ----------------------------------------------------
-        # Select questions
-        #
-        # Currently sequential selection is used.
-        #
-        # Later we can add:
-        # - Random selection
-        # - AI-generated questions
-        # - Adaptive difficulty
-        # - Company-specific questions
-        # ----------------------------------------------------
-
-        selected_questions = (
-            available_questions[
-                :total_questions
-            ]
         )
 
         # ----------------------------------------------------

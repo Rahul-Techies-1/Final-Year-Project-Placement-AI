@@ -60,6 +60,9 @@ import SQLPreparation
 import CoreCSPreparation
     from "../pages/student/preparation/CoreCSPreparation";
 
+import AptitudePreparation
+    from "../pages/student/preparation/AptitudePreparation";
+
 import MockInterviews
     from "../pages/student/preparation/MockInterviews";
 
@@ -298,6 +301,13 @@ function AppRoutes() {
                         path="/student/preparation/core-cs"
                         element={
                             <CoreCSPreparation />
+                        }
+                    />
+
+                    <Route
+                        path="/student/preparation/aptitude"
+                        element={
+                            <AptitudePreparation />
                         }
                     />
 

@@ -117,3 +117,23 @@ export const markSQLProblemIncomplete = async (
 
     return response.data;
 };
+
+// ========================================================
+// EXECUTE SQL QUERY
+// ========================================================
+
+export const executeSQLQuery = async (
+    problemId,
+    query
+) => {
+
+    const response = await api.post(
+        `/preparation/sql/problems/${problemId}/execute`,
+        {
+            problem_id: problemId,
+            query
+        }
+    );
+
+    return response.data;
+};

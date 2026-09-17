@@ -1,27 +1,21 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    Query,
+    status
+)
 from sqlalchemy.orm import Session
 
 from app.database.session import get_db
 
+from app.dependencies.auth import require_role
+
+from app.models.user import User
+
 from app.services.preparation_service import (
     preparation_service
 )
-
-from app.schemas.preparation_schema import (
-    DSATopicResponse,
-    DSAProblemResponse,
-    DSAProblemWithProgressResponse,
-    DSAProgressResponse,
-    DSAProgressUpdateRequest,
-    DSAOverviewResponse,
-    DSAProblemListResponse
-)
-
-# IMPORTANT:
-# Use the same authentication dependency
-# that your existing protected routers use.
-from app.dependencies.auth import require_role
-from app.models.user import User
 
 
 router = APIRouter(
@@ -30,13 +24,12 @@ router = APIRouter(
 )
 
 
-# ========================================================
-# DSA OVERVIEW
-# ========================================================
+# ============================================================
+# DSA - OVERVIEW
+# ============================================================
 
 @router.get(
-    "/dsa/overview",
-    response_model=DSAOverviewResponse
+    "/dsa/overview"
 )
 def get_dsa_overview(
     db: Session = Depends(get_db),
@@ -44,20 +37,27 @@ def get_dsa_overview(
         require_role("student")
     )
 ):
+    try:
 
-    return preparation_service.get_dsa_overview(
-        db=db,
-        user_id=current_user.id
-    )
+        return preparation_service.get_dsa_overview(
+            db=db,
+            user_id=current_user.id
+        )
+
+    except ValueError as e:
+
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
 
 
-# ========================================================
-# GET DSA TOPICS
-# ========================================================
+# ============================================================
+# DSA - TOPICS
+# ============================================================
 
 @router.get(
-    "/dsa/topics",
-    response_model=list[DSATopicResponse]
+    "/dsa/topics"
 )
 def get_dsa_topics(
     db: Session = Depends(get_db),
@@ -71,13 +71,12 @@ def get_dsa_topics(
     )
 
 
-# ========================================================
-# GET DSA PROBLEMS
-# ========================================================
+# ============================================================
+# DSA - PROBLEMS
+# ============================================================
 
 @router.get(
-    "/dsa/problems",
-    response_model=DSAProblemListResponse
+    "/dsa/problems"
 )
 def get_dsa_problems(
     topic_id: int | None = Query(
@@ -100,18 +99,17 @@ def get_dsa_problems(
     except ValueError as e:
 
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e)
         )
 
 
-# ========================================================
-# GET SINGLE DSA PROBLEM
-# ========================================================
+# ============================================================
+# DSA - SINGLE PROBLEM
+# ============================================================
 
 @router.get(
-    "/dsa/problems/{problem_id}",
-    response_model=DSAProblemWithProgressResponse
+    "/dsa/problems/{problem_id}"
 )
 def get_dsa_problem(
     problem_id: int,
@@ -132,27 +130,35 @@ def get_dsa_problem(
     except ValueError as e:
 
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e)
         )
 
 
-# ========================================================
-# UPDATE DSA PROGRESS
-# ========================================================
+# ============================================================
+# DSA - UPDATE PROGRESS
+# ============================================================
 
-@router.put(
-    "/dsa/problems/{problem_id}/progress",
-    response_model=DSAProgressResponse
+@router.patch(
+    "/dsa/problems/{problem_id}/progress"
 )
 def update_dsa_progress(
     problem_id: int,
-    request: DSAProgressUpdateRequest,
+    request: dict,
     db: Session = Depends(get_db),
     current_user: User = Depends(
         require_role("student")
     )
 ):
+
+    completed = request.get("completed")
+
+    if not isinstance(completed, bool):
+
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="The 'completed' field must be a boolean."
+        )
 
     try:
 
@@ -160,76 +166,12 @@ def update_dsa_progress(
             db=db,
             user_id=current_user.id,
             problem_id=problem_id,
-            completed=request.completed
+            completed=completed
         )
 
     except ValueError as e:
 
         raise HTTPException(
-            status_code=404,
-            detail=str(e)
-        )
-
-
-# ========================================================
-# MARK PROBLEM COMPLETED
-# ========================================================
-
-@router.post(
-    "/dsa/problems/{problem_id}/complete",
-    response_model=DSAProgressResponse
-)
-def mark_problem_completed(
-    problem_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(
-        require_role("student")
-    )
-):
-
-    try:
-
-        return preparation_service.mark_problem_completed(
-            db=db,
-            user_id=current_user.id,
-            problem_id=problem_id
-        )
-
-    except ValueError as e:
-
-        raise HTTPException(
-            status_code=404,
-            detail=str(e)
-        )
-
-
-# ========================================================
-# MARK PROBLEM INCOMPLETE
-# ========================================================
-
-@router.post(
-    "/dsa/problems/{problem_id}/incomplete",
-    response_model=DSAProgressResponse
-)
-def mark_problem_incomplete(
-    problem_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(
-        require_role("student")
-    )
-):
-
-    try:
-
-        return preparation_service.mark_problem_incomplete(
-            db=db,
-            user_id=current_user.id,
-            problem_id=problem_id
-        )
-
-    except ValueError as e:
-
-        raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e)
         )
