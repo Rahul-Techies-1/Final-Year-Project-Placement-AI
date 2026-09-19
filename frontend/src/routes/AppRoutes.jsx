@@ -11,6 +11,8 @@ import {
 
 import Login from "../pages/auth/Login";
 
+import Register from "../pages/auth/Register";
+
 
 // ========================================================
 // ROUTE PROTECTION
@@ -98,6 +100,8 @@ import RecruiterDashboard
 import AIMentor from "../pages/student/preparation/AIMentor";
 
 
+
+
 // ========================================================
 // HOME
 // ========================================================
@@ -150,6 +154,8 @@ function AppRoutes() {
                 path="/login"
                 element={<Login />}
             />
+
+            <Route path="/register" element={<Register />} />
 
 
             {/* ==================================================

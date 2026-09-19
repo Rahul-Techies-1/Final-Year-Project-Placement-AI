@@ -2,22 +2,12 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { getDSAOverview } from "../../services/PreparationService";
+import { getSQLOverview } from "../../services/sqlService";
+import { getAptitudeOverview } from "../../services/aptitudeService";
+import { getCoreCSOverview } from "../../services/coreCSService";
+import { getMockInterviewAnalytics } from "../../services/mockInterviewService";
 
-import {
-    getSQLOverview
-} from "../../services/sqlService";
-
-import {
-    getAptitudeOverview
-} from "../../services/aptitudeService";
-
-import {
-    getCoreCSOverview
-} from "../../services/coreCSService";
-
-import {
-    getMockInterviewAnalytics
-} from "../../services/mockInterviewService";
+import "./PreparationDashboard.css";
 
 
 function PreparationDashboard() {
@@ -104,101 +94,6 @@ function PreparationDashboard() {
 
 
     // ========================================================
-    // PREPARATION MODULES
-    // ========================================================
-
-    const preparationModules = [
-
-        {
-            title: "DSA",
-
-            description:
-                "Practice data structures and algorithms for coding rounds.",
-
-            progress:
-                dsaProgress.progress_percentage,
-
-            path:
-                "/student/preparation/dsa"
-        },
-
-
-        {
-            title: "SQL",
-
-            description:
-                "Improve SQL and database skills for placement interviews.",
-
-            progress:
-                sqlProgress.progress_percentage,
-
-            path:
-                "/student/preparation/sql"
-        },
-
-
-        {
-            title: "Core CS",
-
-            description:
-                "Prepare DBMS, OS, Computer Networks and OOP concepts.",
-
-            progress:
-                coreCSProgress.progress_percentage,
-
-            path:
-                "/student/preparation/core-cs"
-        },
-
-
-        {
-            title: "Aptitude",
-
-            description:
-                "Practice quantitative, logical and verbal aptitude.",
-
-            progress:
-                aptitudeProgress.progress_percentage,
-
-            path:
-                "/student/preparation/aptitude"
-        },
-
-
-        {
-            title: "Mock Interviews",
-
-            description:
-                "Practice technical and placement interviews.",
-
-            progress:
-                mockInterviewAnalytics.completion_rate,
-
-            path:
-                "/student/preparation/mock-interviews"
-        },
-
-
-        // ====================================================
-        // AI MENTOR
-        // ====================================================
-
-        {
-            title: "PDF / AI Mentor",
-
-            description:
-                "Upload study material and ask questions using AI.",
-
-            progress: 0,
-
-            path:
-                "/student/preparation/ai-mentor"
-        }
-
-    ];
-
-
-    // ========================================================
     // LOAD PREPARATION DATA
     // ========================================================
 
@@ -218,17 +113,11 @@ function PreparationDashboard() {
             setError("");
 
 
-            // ------------------------------------------------
-            // Load all preparation data together
-            // ------------------------------------------------
+            // ====================================================
+            // LOAD ALL PREPARATION APIs INDEPENDENTLY
+            // ====================================================
 
-            const [
-                dsaResponse,
-                sqlResponse,
-                aptitudeResponse,
-                coreCSResponse,
-                mockInterviewResponse
-            ] = await Promise.all([
+            const results = await Promise.allSettled([
 
                 getDSAOverview(),
 
@@ -243,66 +132,214 @@ function PreparationDashboard() {
             ]);
 
 
-            // ------------------------------------------------
-            // Set DSA progress
-            // ------------------------------------------------
+            console.log(
+                "Preparation Dashboard API Results:",
+                results
+            );
 
-            if (dsaResponse?.progress) {
 
-                setDsaProgress(
-                    dsaResponse.progress
+            // ====================================================
+            // DSA RESPONSE
+            // ====================================================
+
+            const dsaResult = results[0];
+
+            if (dsaResult.status === "fulfilled") {
+
+                console.log(
+                    "DSA Overview Response:",
+                    dsaResult.value
+                );
+
+
+                if (dsaResult.value?.progress) {
+
+                    setDsaProgress(
+                        dsaResult.value.progress
+                    );
+
+                }
+
+            } else {
+
+                console.error(
+                    "DSA Overview API failed:",
+                    dsaResult.reason
                 );
 
             }
 
 
-            // ------------------------------------------------
-            // Set SQL progress
-            // ------------------------------------------------
+            // ====================================================
+            // SQL RESPONSE
+            // ====================================================
 
-            if (sqlResponse?.progress) {
+            const sqlResult = results[1];
 
-                setSqlProgress(
-                    sqlResponse.progress
+            if (sqlResult.status === "fulfilled") {
+
+                console.log(
+                    "SQL Overview Response:",
+                    sqlResult.value
+                );
+
+
+                if (sqlResult.value?.progress) {
+
+                    setSqlProgress(
+                        sqlResult.value.progress
+                    );
+
+                }
+
+            } else {
+
+                console.error(
+                    "SQL Overview API failed:",
+                    sqlResult.reason
                 );
 
             }
 
 
-            // ------------------------------------------------
-            // Set Aptitude progress
-            // ------------------------------------------------
+            // ====================================================
+            // APTITUDE RESPONSE
+            // ====================================================
 
-            if (aptitudeResponse?.progress) {
+            const aptitudeResult = results[2];
 
-                setAptitudeProgress(
-                    aptitudeResponse.progress
+            if (aptitudeResult.status === "fulfilled") {
+
+                console.log(
+                    "Aptitude Overview Response:",
+                    aptitudeResult.value
+                );
+
+
+                if (aptitudeResult.value?.progress) {
+
+                    setAptitudeProgress(
+                        aptitudeResult.value.progress
+                    );
+
+                }
+
+            } else {
+
+                console.error(
+                    "Aptitude Overview API failed:",
+                    aptitudeResult.reason
                 );
 
             }
 
 
-            // ------------------------------------------------
-            // Set Core CS progress
-            // ------------------------------------------------
+            // ====================================================
+            // CORE CS RESPONSE
+            // ====================================================
 
-            if (coreCSResponse?.progress) {
+            const coreCSResult = results[3];
 
-                setCoreCSProgress(
-                    coreCSResponse.progress
+            if (coreCSResult.status === "fulfilled") {
+
+                console.log(
+                    "Core CS Overview Response:",
+                    coreCSResult.value
+                );
+
+
+                if (coreCSResult.value?.progress) {
+
+                    setCoreCSProgress(
+                        coreCSResult.value.progress
+                    );
+
+                }
+
+            } else {
+
+                console.error(
+                    "Core CS Overview API failed:",
+                    coreCSResult.reason
                 );
 
             }
 
 
-            // ------------------------------------------------
-            // Set Mock Interview analytics
-            // ------------------------------------------------
+            // ====================================================
+            // MOCK INTERVIEW RESPONSE
+            // ====================================================
 
-            if (mockInterviewResponse) {
+            const mockInterviewResult = results[4];
 
-                setMockInterviewAnalytics(
-                    mockInterviewResponse
+            if (mockInterviewResult.status === "fulfilled") {
+
+                console.log(
+                    "Mock Interview Analytics Response:",
+                    mockInterviewResult.value
+                );
+
+
+                if (mockInterviewResult.value) {
+
+                    setMockInterviewAnalytics(
+                        mockInterviewResult.value
+                    );
+
+                }
+
+            } else {
+
+                console.error(
+                    "Mock Interview Analytics API failed:",
+                    mockInterviewResult.reason
+                );
+
+            }
+
+
+            // ====================================================
+            // CHECK IF ANY API FAILED
+            // ====================================================
+
+            const failedAPIs = [];
+
+
+            if (dsaResult.status === "rejected") {
+                failedAPIs.push("DSA");
+            }
+
+
+            if (sqlResult.status === "rejected") {
+                failedAPIs.push("SQL");
+            }
+
+
+            if (aptitudeResult.status === "rejected") {
+                failedAPIs.push("Aptitude");
+            }
+
+
+            if (coreCSResult.status === "rejected") {
+                failedAPIs.push("Core CS");
+            }
+
+
+            if (mockInterviewResult.status === "rejected") {
+                failedAPIs.push("Mock Interviews");
+            }
+
+
+            if (failedAPIs.length > 0) {
+
+                console.error(
+                    "Failed Preparation APIs:",
+                    failedAPIs
+                );
+
+
+                setError(
+                    `Unable to load: ${failedAPIs.join(", ")}. Check the browser console for the exact API error.`
                 );
 
             }
@@ -310,12 +347,14 @@ function PreparationDashboard() {
         } catch (error) {
 
             console.error(
-                "Failed to load preparation data:",
+                "Preparation Dashboard Error:",
                 error
             );
 
+
             setError(
                 error.response?.data?.detail ||
+                error.message ||
                 "Unable to load preparation progress."
             );
 
@@ -332,20 +371,6 @@ function PreparationDashboard() {
     // OVERALL PREPARATION PROGRESS
     // ========================================================
 
-    /*
-        Overall preparation progress is calculated
-        from the modules for which measurable progress
-        is currently available.
-
-        Current modules:
-
-        DSA
-        SQL
-        Core CS
-        Aptitude
-        Mock Interviews
-    */
-
     const progressValues = [
 
         dsaProgress.progress_percentage,
@@ -361,14 +386,239 @@ function PreparationDashboard() {
     ];
 
 
-    const overallProgress =
-        Math.round(
-            progressValues.reduce(
-                (total, value) =>
-                    total + (Number(value) || 0),
-                0
-            ) / progressValues.length
-        );
+    const overallProgress = Math.round(
+
+        progressValues.reduce(
+
+            (total, value) =>
+                total + (Number(value) || 0),
+
+            0
+
+        ) / progressValues.length
+
+    );
+
+
+    // ========================================================
+    // PREPARATION MODULES
+    // ========================================================
+
+    const preparationModules = [
+
+        {
+            title: "DSA",
+
+            shortTitle:
+                "Data Structures & Algorithms",
+
+            description:
+                "Master data structures and algorithms for coding rounds.",
+
+            progress:
+                Number(
+                    dsaProgress.progress_percentage
+                ) || 0,
+
+            completed:
+                dsaProgress.completed_problems,
+
+            total:
+                dsaProgress.total_problems,
+
+            icon:
+                "⌘",
+
+            accent:
+                "blue",
+
+            path:
+                "/student/preparation/dsa"
+        },
+
+
+        {
+            title: "SQL",
+
+            shortTitle:
+                "SQL & Databases",
+
+            description:
+                "Build strong SQL and database skills for technical interviews.",
+
+            progress:
+                Number(
+                    sqlProgress.progress_percentage
+                ) || 0,
+
+            completed:
+                sqlProgress.completed_problems,
+
+            total:
+                sqlProgress.total_problems,
+
+            icon:
+                "DB",
+
+            accent:
+                "purple",
+
+            path:
+                "/student/preparation/sql"
+        },
+
+
+        {
+            title: "Core CS",
+
+            shortTitle:
+                "Computer Science Fundamentals",
+
+            description:
+                "Prepare DBMS, OS, Networks and OOP concepts.",
+
+            progress:
+                Number(
+                    coreCSProgress.progress_percentage
+                ) || 0,
+
+            completed:
+                coreCSProgress.completed_questions,
+
+            total:
+                coreCSProgress.total_questions,
+
+            icon:
+                "CS",
+
+            accent:
+                "green",
+
+            path:
+                "/student/preparation/core-cs"
+        },
+
+
+        {
+            title: "Aptitude",
+
+            shortTitle:
+                "Quantitative & Logical Ability",
+
+            description:
+                "Improve quantitative, logical and verbal aptitude.",
+
+            progress:
+                Number(
+                    aptitudeProgress.progress_percentage
+                ) || 0,
+
+            completed:
+                aptitudeProgress.completed_questions,
+
+            total:
+                aptitudeProgress.total_questions,
+
+            icon:
+                "A",
+
+            accent:
+                "orange",
+
+            path:
+                "/student/preparation/aptitude"
+        },
+
+
+        {
+            title: "Mock Interviews",
+
+            shortTitle:
+                "Interview Practice",
+
+            description:
+                "Practice technical and HR interviews in a realistic environment.",
+
+            progress:
+                Number(
+                    mockInterviewAnalytics.completion_rate
+                ) || 0,
+
+            completed:
+                mockInterviewAnalytics.completed_interviews,
+
+            total:
+                mockInterviewAnalytics.total_interviews,
+
+            icon:
+                "MI",
+
+            accent:
+                "pink",
+
+            path:
+                "/student/preparation/mock-interviews"
+        },
+
+
+        {
+            title: "AI Mentor",
+
+            shortTitle:
+                "AI-Powered Learning",
+
+            description:
+                "Upload study material and get answers using your AI mentor.",
+
+            progress:
+                null,
+
+            completed:
+                null,
+
+            total:
+                null,
+
+            icon:
+                "AI",
+
+            accent:
+                "cyan",
+
+            path:
+                "/student/preparation/ai-mentor"
+        }
+
+    ];
+
+
+    // ========================================================
+    // READINESS LABEL
+    // ========================================================
+
+    const getReadinessLabel = () => {
+
+        if (overallProgress >= 80) {
+
+            return "Strong Progress";
+
+        }
+
+        if (overallProgress >= 60) {
+
+            return "Good Progress";
+
+        }
+
+        if (overallProgress >= 40) {
+
+            return "Building Momentum";
+
+        }
+
+        return "Getting Started";
+
+    };
 
 
     // ========================================================
@@ -381,25 +631,52 @@ function PreparationDashboard() {
 
 
             {/* ==================================================
-                HEADER
+                HERO HEADER
             ================================================== */}
 
-            <div className="page-header">
+            <header className="preparation-hero">
 
-                <div>
+                <div className="hero-content">
+
+                    <div className="hero-badge">
+
+                        <span className="hero-badge-dot"></span>
+
+                        Placement Preparation
+
+                    </div>
+
 
                     <h1>
                         Preparation Dashboard
                     </h1>
 
+
                     <p>
-                        Prepare smarter and track your placement
-                        readiness in one place.
+                        Build the skills, confidence and interview
+                        readiness you need to crack your placement.
                     </p>
 
                 </div>
 
-            </div>
+
+                <button
+                    type="button"
+                    className="hero-jobs-button"
+                    onClick={() =>
+                        navigate("/student/jobs")
+                    }
+                >
+
+                    Explore Jobs
+
+                    <span>
+                        →
+                    </span>
+
+                </button>
+
+            </header>
 
 
             {/* ==================================================
@@ -408,11 +685,25 @@ function PreparationDashboard() {
 
             {error && (
 
-                <div className="error-state">
+                <div className="preparation-error">
 
-                    <p>
-                        {error}
-                    </p>
+                    <div className="error-icon">
+                        !
+                    </div>
+
+
+                    <div className="error-content">
+
+                        <strong>
+                            Some preparation data could not be loaded
+                        </strong>
+
+                        <span>
+                            {error}
+                        </span>
+
+                    </div>
+
 
                     <button
                         type="button"
@@ -427,53 +718,141 @@ function PreparationDashboard() {
 
 
             {/* ==================================================
-                OVERALL PROGRESS
+                OVERALL READINESS
             ================================================== */}
 
-            <section className="preparation-overview">
+            <section className="overall-card">
 
-                <div>
 
-                    <p>
-                        Overall Preparation
-                    </p>
+                <div className="overall-card-content">
+
+                    <div className="section-eyebrow">
+                        OVERALL PREPARATION
+                    </div>
+
 
                     <h2>
-                        {loading
-                            ? "..."
-                            : `${overallProgress}%`
-                        }
+                        Your placement journey starts here.
                     </h2>
 
+
                     <p>
-                        {loading
-                            ? "Loading preparation progress..."
-                            : "Based on your current preparation activity."
-                        }
+                        Track your progress across technical
+                        skills, aptitude and interview preparation.
                     </p>
+
+
+                    <div className="overall-stats">
+
+                        <div className="overall-score">
+
+                            <strong>
+
+                                {loading
+
+                                    ? "..."
+
+                                    : `${overallProgress}%`
+
+                                }
+
+                            </strong>
+
+
+                            <span>
+                                Overall Progress
+                            </span>
+
+                        </div>
+
+
+                        <div className="overall-status">
+
+                            <span className="status-dot"></span>
+
+                            {loading
+
+                                ? "Loading..."
+
+                                : getReadinessLabel()
+
+                            }
+
+                        </div>
+
+                    </div>
+
+
+                    <div className="overall-progress-container">
+
+                        <div className="overall-progress-track">
+
+                            <div
+                                className="overall-progress-fill"
+
+                                style={{
+                                    width:
+                                        `${overallProgress}%`
+                                }}
+
+                            />
+
+                        </div>
+
+
+                        <div className="progress-labels">
+
+                            <span>
+                                Preparation Progress
+                            </span>
+
+                            <span>
+                                {overallProgress}%
+                            </span>
+
+                        </div>
+
+                    </div>
 
                 </div>
 
 
-                <div>
+                {/* ==================================================
+                    CIRCULAR SCORE
+                ================================================== */}
+
+                <div className="readiness-circle-wrapper">
 
                     <div
-                        className="progress-bar"
-                        role="progressbar"
-                        aria-valuenow={
-                            overallProgress
-                        }
-                        aria-valuemin="0"
-                        aria-valuemax="100"
+                        className="readiness-circle"
+
+                        style={{
+                            "--progress":
+                                `${overallProgress * 3.6}deg`
+                        }}
+
                     >
 
-                        <div
-                            className="progress-bar-fill"
-                            style={{
-                                width:
-                                    `${overallProgress}%`
-                            }}
-                        />
+                        <div className="readiness-circle-inner">
+
+                            <strong>
+
+                                {loading
+
+                                    ? "..."
+
+                                    : overallProgress
+
+                                }
+
+                            </strong>
+
+
+                            <span>
+                                READINESS
+                            </span>
+
+                        </div>
 
                     </div>
 
@@ -486,18 +865,26 @@ function PreparationDashboard() {
                 PREPARATION MODULES
             ================================================== */}
 
-            <section>
+            <section className="modules-section">
 
-                <div className="section-header">
+
+                <div className="section-heading">
 
                     <div>
+
+                        <span className="section-eyebrow">
+                            PREPARATION
+                        </span>
+
 
                         <h2>
                             Preparation Modules
                         </h2>
 
+
                         <p>
-                            Choose an area and start preparing.
+                            Choose a skill area and continue
+                            building your placement readiness.
                         </p>
 
                     </div>
@@ -508,18 +895,46 @@ function PreparationDashboard() {
                 <div className="preparation-grid">
 
                     {preparationModules.map(
+
                         (module) => (
 
-                            <div
+                            <article
                                 className="preparation-card"
                                 key={module.title}
                             >
 
-                                <div>
+
+                                {/* CARD TOP */}
+
+                                <div className="card-top">
+
+                                    <div
+                                        className={`module-icon ${module.accent}`}
+                                    >
+                                        {module.icon}
+                                    </div>
+
+
+                                    <span className="module-arrow">
+                                        ↗
+                                    </span>
+
+                                </div>
+
+
+                                {/* CARD TITLE */}
+
+                                <div className="card-title-area">
+
+                                    <span className="module-category">
+                                        {module.shortTitle}
+                                    </span>
+
 
                                     <h3>
                                         {module.title}
                                     </h3>
+
 
                                     <p>
                                         {module.description}
@@ -528,49 +943,105 @@ function PreparationDashboard() {
                                 </div>
 
 
-                                <div>
+                                {/* PROGRESS */}
 
-                                    <p>
-                                        Progress:{" "}
-                                        {module.progress}%
-                                    </p>
+                                {module.progress !== null ? (
 
-                                    <div
-                                        className="progress-bar"
-                                        role="progressbar"
-                                        aria-valuenow={
-                                            module.progress
-                                        }
-                                        aria-valuemin="0"
-                                        aria-valuemax="100"
-                                    >
+                                    <div className="module-progress">
 
-                                        <div
-                                            className="progress-bar-fill"
-                                            style={{
-                                                width:
-                                                    `${module.progress}%`
-                                            }}
-                                        />
+                                        <div className="module-progress-header">
+
+                                            <span>
+                                                Progress
+                                            </span>
+
+
+                                            <strong>
+                                                {module.progress}%
+                                            </strong>
+
+                                        </div>
+
+
+                                        <div className="module-progress-track">
+
+                                            <div
+                                                className={`module-progress-fill ${module.accent}`}
+
+                                                style={{
+                                                    width:
+                                                        `${module.progress}%`
+                                                }}
+
+                                            />
+
+                                        </div>
+
+
+                                        {module.total > 0 && (
+
+                                            <span className="module-count">
+
+                                                {module.completed} of{" "}
+
+                                                {module.total}
+
+                                                {" "}completed
+
+                                            </span>
+
+                                        )}
 
                                     </div>
 
-                                </div>
+                                ) : (
 
+                                    <div className="ai-module-status">
+
+                                        <span>
+                                            ✦
+                                        </span>
+
+                                        AI Powered Learning
+
+                                    </div>
+
+                                )}
+
+
+                                {/* BUTTON */}
 
                                 <button
                                     type="button"
+                                    className="module-button"
+
                                     onClick={() =>
                                         navigate(
                                             module.path
                                         )
                                     }
+
                                 >
-                                    Start Preparing
+
+                                    {module.progress > 0
+
+                                        ? "Continue Preparing"
+
+                                        : "Start Preparing"
+
+                                    }
+
+
+                                    <span>
+                                        →
+                                    </span>
+
                                 </button>
 
-                            </div>
+                            </article>
+
                         )
+
                     )}
 
                 </div>
@@ -579,63 +1050,176 @@ function PreparationDashboard() {
 
 
             {/* ==================================================
-                MOCK INTERVIEW SUMMARY
+                MOCK INTERVIEW PERFORMANCE
             ================================================== */}
 
-            <section className="readiness-section">
-
-                <h2>
-                    Mock Interview Performance
-                </h2>
-
-                <p>
-                    Track your interview practice and
-                    performance.
-                </p>
+            <section className="performance-section">
 
 
-                <div>
+                <div className="section-heading">
 
-                    <strong>
-                        Average Score
-                    </strong>
+                    <div>
 
-                    <h2>
-                        {mockInterviewAnalytics.average_score !== null
-                            ? `${mockInterviewAnalytics.average_score}%`
-                            : "—"
+                        <span className="section-eyebrow">
+                            INTERVIEW PRACTICE
+                        </span>
+
+
+                        <h2>
+                            Mock Interview Performance
+                        </h2>
+
+
+                        <p>
+                            Review your interview practice and
+                            keep improving your performance.
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        className="section-action"
+
+                        onClick={() =>
+                            navigate(
+                                "/student/preparation/mock-interviews"
+                            )
                         }
-                    </h2>
+
+                    >
+                        Practice Interview →
+                    </button>
 
                 </div>
 
 
-                <div>
-
-                    <strong>
-                        Interviews Completed
-                    </strong>
-
-                    <h2>
-                        {
-                            mockInterviewAnalytics.completed_interviews
-                        }
-                    </h2>
-
-                </div>
+                <div className="performance-grid">
 
 
-                <div>
+                    {/* AVERAGE SCORE */}
 
-                    <strong>
-                        Questions Answered
-                    </strong>
+                    <div className="performance-card">
 
-                    <h2>
-                        {
-                            mockInterviewAnalytics.total_questions_answered
-                        }
-                    </h2>
+                        <div className="performance-icon blue">
+                            %
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Average Score
+                            </span>
+
+
+                            <strong>
+
+                                {
+                                    mockInterviewAnalytics.average_score !== null
+
+                                        ? `${mockInterviewAnalytics.average_score}%`
+
+                                        : "—"
+                                }
+
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    {/* COMPLETED */}
+
+                    <div className="performance-card">
+
+                        <div className="performance-icon green">
+                            ✓
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Interviews Completed
+                            </span>
+
+
+                            <strong>
+
+                                {
+                                    mockInterviewAnalytics.completed_interviews
+                                }
+
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    {/* QUESTIONS */}
+
+                    <div className="performance-card">
+
+                        <div className="performance-icon purple">
+                            Q
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Questions Answered
+                            </span>
+
+
+                            <strong>
+
+                                {
+                                    mockInterviewAnalytics.total_questions_answered
+                                }
+
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    {/* BEST SCORE */}
+
+                    <div className="performance-card">
+
+                        <div className="performance-icon orange">
+                            ★
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Best Score
+                            </span>
+
+
+                            <strong>
+
+                                {
+                                    mockInterviewAnalytics.best_score !== null
+
+                                        ? `${mockInterviewAnalytics.best_score}%`
+
+                                        : "—"
+                                }
+
+                            </strong>
+
+                        </div>
+
+                    </div>
 
                 </div>
 
@@ -643,39 +1227,63 @@ function PreparationDashboard() {
 
 
             {/* ==================================================
-                PLACEMENT READINESS
+                FINAL READINESS SECTION
             ================================================== */}
 
-            <section className="readiness-section">
+            <section className="readiness-banner">
 
-                <h2>
-                    Placement Readiness
-                </h2>
 
-                <p>
-                    Your readiness score is based on your
-                    preparation activity across DSA, SQL,
-                    Core CS, Aptitude and Mock Interviews.
-                </p>
+                <div className="readiness-banner-icon">
+                    ✦
+                </div>
 
-                <div>
 
-                    <strong>
-                        Current Readiness Score
-                    </strong>
+                <div className="readiness-banner-content">
+
+                    <span className="section-eyebrow">
+                        PLACEMENT READINESS
+                    </span>
+
 
                     <h2>
-                        {loading
-                            ? "..."
-                            : `${overallProgress}%`
-                        }
+                        Keep building your preparation.
                     </h2>
+
+
+                    <p>
+                        Your readiness score combines your progress
+                        across DSA, SQL, Core CS, Aptitude and Mock Interviews.
+                    </p>
+
+                </div>
+
+
+                <div className="readiness-banner-score">
+
+                    <strong>
+
+                        {loading
+
+                            ? "..."
+
+                            : `${overallProgress}%`
+
+                        }
+
+                    </strong>
+
+
+                    <span>
+                        Current Score
+                    </span>
 
                 </div>
 
             </section>
 
+
         </div>
+
     );
 }
 

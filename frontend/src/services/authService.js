@@ -41,13 +41,21 @@ export const loginUser = async ({
 // REGISTER USER
 // ========================================================
 
-export const registerUser = async (
-    userData
-) => {
+export const registerUser = async ({
+    full_name,
+    email,
+    password,
+    role
+}) => {
 
     const response = await api.post(
         "/auth/register",
-        userData
+        {
+            full_name,
+            email,
+            password,
+            role
+        }
     );
 
     return response.data;

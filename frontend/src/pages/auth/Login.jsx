@@ -10,13 +10,23 @@ function Login() {
     const navigate = useNavigate();
 
     const {
-        login
+        login,
+        logout
     } = useAuth();
 
+
+    // ========================================================
+    // STATE
+    // ========================================================
+
     const [email, setEmail] = useState("");
+
     const [password, setPassword] = useState("");
 
+    const [role, setRole] = useState("student");
+
     const [error, setError] = useState("");
+
     const [loading, setLoading] = useState(false);
 
 
@@ -29,13 +39,14 @@ function Login() {
         event.preventDefault();
 
         setError("");
+
         setLoading(true);
 
         try {
 
             // ------------------------------------------------
             // STEP 1
-            // Authenticate with FastAPI
+            // AUTHENTICATE WITH FASTAPI
             // ------------------------------------------------
 
             const response = await loginUser({
@@ -46,7 +57,7 @@ function Login() {
 
             // ------------------------------------------------
             // STEP 2
-            // Store token and fetch current user
+            // STORE TOKEN + FETCH USER
             // ------------------------------------------------
 
             const userData = await login(
@@ -56,7 +67,28 @@ function Login() {
 
             // ------------------------------------------------
             // STEP 3
-            // Navigate according to user role
+            // VERIFY SELECTED ROLE
+            // ------------------------------------------------
+
+            if (userData.role !== role) {
+
+                logout();
+
+                setError(
+                    `This account is registered as a ${
+                        userData.role === "recruiter"
+                            ? "Recruiter"
+                            : "Student"
+                    }. Please select the correct login option.`
+                );
+
+                return;
+            }
+
+
+            // ------------------------------------------------
+            // STEP 4
+            // ROLE-BASED NAVIGATION
             // ------------------------------------------------
 
             if (userData.role === "recruiter") {
@@ -78,6 +110,8 @@ function Login() {
                 );
 
             } else {
+
+                logout();
 
                 setError(
                     "Your account does not have a valid role."
@@ -111,13 +145,15 @@ function Login() {
 
         <div className="login-page">
 
+
             {/* ==================================================
-                LEFT BRAND / HERO SECTION
+                LEFT HERO
             ================================================== */}
 
             <section className="login-hero">
 
                 <div className="login-hero-content">
+
 
                     {/* BRAND */}
 
@@ -159,6 +195,7 @@ function Login() {
 
                         <div className="login-feature-list">
 
+
                             <div className="login-feature">
 
                                 <span className="login-feature-icon">
@@ -166,6 +203,7 @@ function Login() {
                                 </span>
 
                                 <div>
+
                                     <strong>
                                         AI-powered preparation
                                     </strong>
@@ -173,6 +211,7 @@ function Login() {
                                     <span>
                                         Learn with your personal AI Mentor.
                                     </span>
+
                                 </div>
 
                             </div>
@@ -185,6 +224,7 @@ function Login() {
                                 </span>
 
                                 <div>
+
                                     <strong>
                                         Mock interviews
                                     </strong>
@@ -192,6 +232,7 @@ function Login() {
                                     <span>
                                         Practice and improve your interview performance.
                                     </span>
+
                                 </div>
 
                             </div>
@@ -204,6 +245,7 @@ function Login() {
                                 </span>
 
                                 <div>
+
                                     <strong>
                                         Complete placement journey
                                     </strong>
@@ -211,6 +253,7 @@ function Login() {
                                     <span>
                                         Jobs, applications, interviews and analytics in one place.
                                     </span>
+
                                 </div>
 
                             </div>
@@ -267,6 +310,9 @@ function Login() {
 
                     <div className="login-card">
 
+
+                        {/* HEADER */}
+
                         <div className="login-card-header">
 
                             <span className="login-welcome">
@@ -284,10 +330,99 @@ function Login() {
                         </div>
 
 
+                        {/* ROLE SELECTOR */}
+
+                        <div className="login-role-section">
+
+                            <label>
+                                Login as
+                            </label>
+
+
+                            <div className="login-role-options">
+
+
+                                {/* STUDENT */}
+
+                                <button
+                                    type="button"
+                                    className={
+                                        role === "student"
+                                            ? "login-role-option active"
+                                            : "login-role-option"
+                                    }
+                                    onClick={() => {
+                                        setRole("student");
+                                        setError("");
+                                    }}
+                                    disabled={loading}
+                                >
+
+                                    <span className="login-role-icon">
+                                        🎓
+                                    </span>
+
+                                    <span>
+
+                                        <strong>
+                                            Student
+                                        </strong>
+
+                                        <small>
+                                            Prepare & get placed
+                                        </small>
+
+                                    </span>
+
+                                </button>
+
+
+                                {/* RECRUITER */}
+
+                                <button
+                                    type="button"
+                                    className={
+                                        role === "recruiter"
+                                            ? "login-role-option active"
+                                            : "login-role-option"
+                                    }
+                                    onClick={() => {
+                                        setRole("recruiter");
+                                        setError("");
+                                    }}
+                                    disabled={loading}
+                                >
+
+                                    <span className="login-role-icon">
+                                        💼
+                                    </span>
+
+                                    <span>
+
+                                        <strong>
+                                            Recruiter
+                                        </strong>
+
+                                        <small>
+                                            Hire talented students
+                                        </small>
+
+                                    </span>
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+                        {/* FORM */}
+
                         <form
                             className="login-form"
                             onSubmit={handleSubmit}
                         >
+
 
                             {/* EMAIL */}
 
@@ -307,13 +442,11 @@ function Login() {
                                         strokeWidth="1.8"
                                         aria-hidden="true"
                                     >
-                                        <path
-                                            d="M4 6h16v12H4z"
-                                        />
 
-                                        <path
-                                            d="m4 7 8 6 8-6"
-                                        />
+                                        <path d="M4 6h16v12H4z" />
+
+                                        <path d="m4 7 8 6 8-6" />
+
                                     </svg>
 
                                     <input
@@ -338,13 +471,9 @@ function Login() {
 
                             <div className="login-field">
 
-                                <div className="login-label-row">
-
-                                    <label htmlFor="password">
-                                        Password
-                                    </label>
-
-                                </div>
+                                <label htmlFor="password">
+                                    Password
+                                </label>
 
                                 <div className="login-input-wrapper">
 
@@ -356,6 +485,7 @@ function Login() {
                                         strokeWidth="1.8"
                                         aria-hidden="true"
                                     >
+
                                         <rect
                                             x="5"
                                             y="10"
@@ -422,7 +552,6 @@ function Login() {
 
                                     <>
                                         <span className="login-spinner"></span>
-
                                         Signing in...
                                     </>
 
@@ -438,9 +567,13 @@ function Login() {
                                             strokeWidth="2"
                                             aria-hidden="true"
                                         >
+
                                             <path d="M5 12h14" />
+
                                             <path d="m13 6 6 6-6 6" />
+
                                         </svg>
+
                                     </>
 
                                 )}
@@ -448,6 +581,26 @@ function Login() {
                             </button>
 
                         </form>
+
+
+                        {/* REGISTER LINK */}
+
+                        <div className="login-register-section">
+
+                            <span>
+                                Don't have an account?
+                            </span>
+
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    navigate("/register")
+                                }
+                            >
+                                Create account
+                            </button>
+
+                        </div>
 
 
                         {/* SECURITY NOTE */}
@@ -461,11 +614,13 @@ function Login() {
                                 strokeWidth="1.8"
                                 aria-hidden="true"
                             >
+
                                 <path
                                     d="M12 3 5 6v5c0 4.6 2.9 8.4 7 10 4.1-1.6 7-5.4 7-10V6l-7-3Z"
                                 />
 
                                 <path d="m9 12 2 2 4-4" />
+
                             </svg>
 
                             <span>
@@ -480,8 +635,10 @@ function Login() {
                     {/* BOTTOM TEXT */}
 
                     <p className="login-bottom-text">
+
                         PlacementAI helps students prepare, practice and
                         navigate their placement journey from one platform.
+
                     </p>
 
                 </div>

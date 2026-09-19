@@ -68,6 +68,61 @@ function MyApplications() {
 
 
     // ========================================================
+    // STATUS FORMATTER
+    // ========================================================
+
+    const formatStatus = (status) => {
+
+        if (!status) {
+            return "Unknown";
+        }
+
+        return status
+            .replaceAll("_", " ")
+            .replace(
+                /\b\w/g,
+                (character) =>
+                    character.toUpperCase()
+            );
+    };
+
+
+    // ========================================================
+    // STATUS CLASS
+    // ========================================================
+
+    const getStatusClass = (status) => {
+
+        switch (status?.toLowerCase()) {
+
+            case "applied":
+            case "submitted":
+                return "status-applied";
+
+            case "shortlisted":
+                return "status-shortlisted";
+
+            case "interview":
+            case "interview_scheduled":
+                return "status-interview";
+
+            case "selected":
+            case "accepted":
+                return "status-selected";
+
+            case "rejected":
+                return "status-rejected";
+
+            case "withdrawn":
+                return "status-withdrawn";
+
+            default:
+                return "status-default";
+        }
+    };
+
+
+    // ========================================================
     // UI
     // ========================================================
 
@@ -77,19 +132,24 @@ function MyApplications() {
 
 
             {/* ==================================================
-                HEADER
+                PAGE HEADER
             ================================================== */}
 
-            <div className="page-header">
+            <header className="applications-page-header">
 
-                <div>
+                <div className="applications-header-content">
+
+                    <span className="applications-eyebrow">
+                        APPLICATION TRACKER
+                    </span>
 
                     <h1>
                         My Applications
                     </h1>
 
                     <p>
-                        Track the jobs you have applied for.
+                        Track your job applications and
+                        monitor your placement journey.
                     </p>
 
                 </div>
@@ -97,14 +157,122 @@ function MyApplications() {
 
                 <button
                     type="button"
+                    className="applications-primary-button"
                     onClick={() =>
                         navigate("/student/jobs")
                     }
                 >
-                    Explore Jobs
+
+                    <span>
+                        Explore Jobs
+                    </span>
+
+                    <span className="button-arrow">
+                        →
+                    </span>
+
                 </button>
 
-            </div>
+            </header>
+
+
+            {/* ==================================================
+                APPLICATION OVERVIEW
+            ================================================== */}
+
+            {!loading &&
+                !error &&
+                applications.length > 0 && (
+
+                    <section className="applications-overview">
+
+                        <div className="application-overview-card">
+
+                            <div className="overview-icon">
+                                ◎
+                            </div>
+
+                            <div>
+
+                                <span>
+                                    Total Applications
+                                </span>
+
+                                <strong>
+                                    {applications.length}
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <div className="application-overview-card">
+
+                            <div className="overview-icon">
+                                ✓
+                            </div>
+
+                            <div>
+
+                                <span>
+                                    Active Applications
+                                </span>
+
+                                <strong>
+                                    {
+                                        applications.filter(
+                                            (application) =>
+                                                ![
+                                                    "rejected",
+                                                    "withdrawn",
+                                                    "selected",
+                                                    "accepted"
+                                                ].includes(
+                                                    application.status?.toLowerCase()
+                                                )
+                                        ).length
+                                    }
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <div className="application-overview-card">
+
+                            <div className="overview-icon">
+                                ★
+                            </div>
+
+                            <div>
+
+                                <span>
+                                    Selected
+                                </span>
+
+                                <strong>
+                                    {
+                                        applications.filter(
+                                            (application) =>
+                                                [
+                                                    "selected",
+                                                    "accepted"
+                                                ].includes(
+                                                    application.status?.toLowerCase()
+                                                )
+                                        ).length
+                                    }
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+                )}
 
 
             {/* ==================================================
@@ -113,13 +281,20 @@ function MyApplications() {
 
             {loading && (
 
-                <div>
+                <section className="applications-state-card">
+
+                    <div className="applications-loader"></div>
+
+                    <h2>
+                        Loading your applications
+                    </h2>
 
                     <p>
-                        Loading your applications...
+                        We're getting your application
+                        history ready.
                     </p>
 
-                </div>
+                </section>
 
             )}
 
@@ -130,7 +305,15 @@ function MyApplications() {
 
             {!loading && error && (
 
-                <div>
+                <section className="applications-state-card applications-error-card">
+
+                    <div className="state-icon error-icon">
+                        !
+                    </div>
+
+                    <h2>
+                        Something went wrong
+                    </h2>
 
                     <p>
                         {error}
@@ -138,12 +321,13 @@ function MyApplications() {
 
                     <button
                         type="button"
+                        className="applications-secondary-button"
                         onClick={fetchApplications}
                     >
                         Try Again
                     </button>
 
-                </div>
+                </section>
 
             )}
 
@@ -156,7 +340,19 @@ function MyApplications() {
                 !error &&
                 applications.length === 0 && (
 
-                    <div>
+                    <section className="applications-state-card applications-empty-card">
+
+                        <div className="empty-illustration">
+
+                            <div className="empty-folder">
+                                <span></span>
+                            </div>
+
+                        </div>
+
+                        <span className="empty-eyebrow">
+                            START YOUR JOURNEY
+                        </span>
 
                         <h2>
                             No Applications Yet
@@ -164,18 +360,29 @@ function MyApplications() {
 
                         <p>
                             You haven't applied for any jobs yet.
+                            Explore available opportunities and
+                            start building your placement journey.
                         </p>
 
                         <button
                             type="button"
+                            className="applications-primary-button"
                             onClick={() =>
                                 navigate("/student/jobs")
                             }
                         >
-                            Explore Available Jobs
+
+                            <span>
+                                Explore Available Jobs
+                            </span>
+
+                            <span className="button-arrow">
+                                →
+                            </span>
+
                         </button>
 
-                    </div>
+                    </section>
 
                 )}
 
@@ -188,100 +395,188 @@ function MyApplications() {
                 !error &&
                 applications.length > 0 && (
 
-                    <div className="applications-list">
+                    <section className="applications-list-section">
 
-                        {applications.map(
-                            (application) => (
 
-                                <div
-                                    className="application-card"
-                                    key={
+                        {/* SECTION HEADER */}
+
+                        <div className="applications-section-header">
+
+                            <div>
+
+                                <span className="applications-eyebrow">
+                                    YOUR APPLICATIONS
+                                </span>
+
+                                <h2>
+                                    Application History
+                                </h2>
+
+                                <p>
+                                    Review the jobs you've applied
+                                    for and check their current status.
+                                </p>
+
+                            </div>
+
+                            <span className="application-count-badge">
+                                {applications.length}{" "}
+                                {applications.length === 1
+                                    ? "Application"
+                                    : "Applications"
+                                }
+                            </span>
+
+                        </div>
+
+
+                        {/* APPLICATION CARDS */}
+
+                        <div className="applications-list">
+
+                            {applications.map(
+                                (application) => {
+
+                                    const applicationId =
                                         application.application_id ||
-                                        application.id
-                                    }
-                                >
+                                        application.id;
 
-                                    <div>
+                                    const jobTitle =
+                                        application.job_title ||
+                                        application.job?.title ||
+                                        "Job Application";
 
-                                        <h2>
-                                            {
-                                                application.job_title ||
-                                                application.job?.title ||
-                                                "Job Application"
-                                            }
-                                        </h2>
+                                    const company =
+                                        application.company ||
+                                        application.job?.company ||
+                                        "Company not specified";
 
+                                    const location =
+                                        application.location ||
+                                        application.job?.location;
 
-                                        <p>
-                                            <strong>
-                                                Company:
-                                            </strong>{" "}
+                                    const status =
+                                        application.status ||
+                                        "unknown";
 
-                                            {
-                                                application.company ||
-                                                application.job?.company ||
-                                                "Not specified"
-                                            }
-                                        </p>
+                                    return (
 
-
-                                        {application.location && (
-
-                                            <p>
-                                                <strong>
-                                                    Location:
-                                                </strong>{" "}
-
-                                                {
-                                                    application.location
-                                                }
-                                            </p>
-
-                                        )}
-
-                                    </div>
-
-
-                                    {/* STATUS */}
-
-                                    <div>
-
-                                        <span>
-                                            {
-                                                application.status ||
-                                                "Unknown"
-                                            }
-                                        </span>
-
-                                    </div>
-
-
-                                    {/* DETAILS */}
-
-                                    <div>
-
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                navigate(
-                                                    `/student/applications/${
-                                                        application.application_id ||
-                                                        application.id
-                                                    }`
-                                                )
-                                            }
+                                        <article
+                                            className="application-card"
+                                            key={applicationId}
                                         >
-                                            View Application
-                                        </button>
 
-                                    </div>
 
-                                </div>
+                                            {/* CARD MAIN CONTENT */}
 
-                            )
-                        )}
+                                            <div className="application-card-main">
 
-                    </div>
+                                                <div className="company-avatar">
+
+                                                    {company
+                                                        .charAt(0)
+                                                        .toUpperCase()
+                                                    }
+
+                                                </div>
+
+
+                                                <div className="application-info">
+
+                                                    <h3>
+                                                        {jobTitle}
+                                                    </h3>
+
+                                                    <p className="application-company">
+                                                        {company}
+                                                    </p>
+
+
+                                                    <div className="application-meta">
+
+                                                        {location && (
+
+                                                            <span>
+                                                                <span className="meta-icon">
+                                                                    ●
+                                                                </span>
+
+                                                                {location}
+                                                            </span>
+
+                                                        )}
+
+                                                        <span>
+                                                            <span className="meta-icon">
+                                                                #
+                                                            </span>
+
+                                                            Application #
+                                                            {applicationId}
+                                                        </span>
+
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+
+                                            {/* STATUS */}
+
+                                            <div className="application-status-area">
+
+                                                <span
+                                                    className={`application-status ${getStatusClass(
+                                                        status
+                                                    )}`}
+                                                >
+
+                                                    <span className="status-dot"></span>
+
+                                                    {formatStatus(
+                                                        status
+                                                    )}
+
+                                                </span>
+
+                                            </div>
+
+
+                                            {/* ACTION */}
+
+                                            <div className="application-card-action">
+
+                                                <button
+                                                    type="button"
+                                                    className="application-view-button"
+                                                    onClick={() =>
+                                                        navigate(
+                                                            `/student/applications/${applicationId}`
+                                                        )
+                                                    }
+                                                >
+
+                                                    View Details
+
+                                                    <span>
+                                                        →
+                                                    </span>
+
+                                                </button>
+
+                                            </div>
+
+                                        </article>
+
+                                    );
+
+                                }
+                            )}
+
+                        </div>
+
+                    </section>
 
                 )}
 

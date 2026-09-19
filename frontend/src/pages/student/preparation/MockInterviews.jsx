@@ -40,7 +40,7 @@ const MockInterviews = () => {
         useState("medium");
 
     const [totalQuestions, setTotalQuestions] =
-        useState(10);
+        useState(5);
 
 
     // ========================================================
@@ -64,36 +64,57 @@ const MockInterviews = () => {
 
             setError("");
 
-            const[
+            const [
                 interviewsResponse,
                 analyticsResponse
-            ]= await Promise.all([
+            ] = await Promise.all([
                 getMockInterviews(),
-
                 getMockInterviewAnalytics()
             ]);
+
+
+            // ------------------------------------------------
+            // MOCK INTERVIEW LIST
+            // Backend returns:
+            // {
+            //     items: [...],
+            //     total: number
+            // }
+            // ------------------------------------------------
+
             setInterviews(
-                interviewsResponse || []
+                interviewsResponse?.items || []
             );
+
+
+            // ------------------------------------------------
+            // ANALYTICS
+            // ------------------------------------------------
+
             setAnalytics(
                 analyticsResponse || null
             );
-        }catch (err){
+
+        } catch (err) {
+
             console.error(
                 "Failed to load mock interviews:",
                 err
             );
+
             setError(
                 err?.response?.data?.detail ||
                 "Failed to load mock interviews."
             );
+
         } finally {
+
             setLoading(false);
 
             setAnalyticsLoading(false);
+
         }
     };
-
 
 
     // ========================================================
@@ -108,6 +129,7 @@ const MockInterviews = () => {
 
             setError("");
 
+
             const interview =
                 await createMockInterview({
 
@@ -116,6 +138,7 @@ const MockInterviews = () => {
                     difficulty,
 
                     totalQuestions
+
                 });
 
 
@@ -161,14 +184,18 @@ const MockInterviews = () => {
                 "Are you sure you want to delete this mock interview?"
             );
 
+
         if (!confirmed) {
+
             return;
+
         }
 
 
         try {
 
             setError("");
+
 
             await deleteMockInterview(
                 interviewId
@@ -208,6 +235,7 @@ const MockInterviews = () => {
         navigate(
             `/student/preparation/mock-interviews/${interviewId}`
         );
+
     };
 
 
@@ -220,8 +248,11 @@ const MockInterviews = () => {
     ) => {
 
         if (!date) {
+
             return "—";
+
         }
+
 
         return new Date(date).toLocaleDateString(
             "en-IN",
@@ -231,6 +262,7 @@ const MockInterviews = () => {
                 year: "numeric"
             }
         );
+
     };
 
 
@@ -243,8 +275,11 @@ const MockInterviews = () => {
     ) => {
 
         if (!status) {
+
             return "Unknown";
+
         }
+
 
         return status
             .replaceAll("_", " ")
@@ -253,6 +288,7 @@ const MockInterviews = () => {
                 (character) =>
                     character.toUpperCase()
             );
+
     };
 
 
@@ -263,23 +299,19 @@ const MockInterviews = () => {
     const totalInterviews =
         interviews.length;
 
+
     const completedInterviews =
         interviews.filter(
             (interview) =>
                 interview.status === "completed"
         ).length;
 
+
     const inProgressInterviews =
         interviews.filter(
             (interview) =>
                 interview.status === "in_progress"
         ).length;
-
-
-    {/* ==================================================
-    MOCK INTERVIEW ANALYTICS
-    ================================================== */}
-
 
 
     // ========================================================
@@ -310,12 +342,15 @@ const MockInterviews = () => {
 
                 </div>
 
+
                 <p>
                     Loading mock interviews...
                 </p>
 
             </div>
+
         );
+
     }
 
 
@@ -363,6 +398,7 @@ const MockInterviews = () => {
                         {error}
                     </p>
 
+
                     <button
                         type="button"
                         onClick={loadInterviews}
@@ -371,6 +407,7 @@ const MockInterviews = () => {
                     </button>
 
                 </div>
+
             )}
 
 
@@ -420,12 +457,17 @@ const MockInterviews = () => {
 
             </section>
 
+
             {/* ==================================================
                 MOCK INTERVIEW ANALYTICS
             ================================================== */}
 
-            {!analyticsLoading &&(
-                <MockInterviewAnalytics analytics={analytics} />
+            {!analyticsLoading && (
+
+                <MockInterviewAnalytics
+                    analytics={analytics}
+                />
+
             )}
 
 
@@ -456,7 +498,9 @@ const MockInterviews = () => {
                 <div className="mock-interview-form">
 
 
-                    {/* INTERVIEW TYPE */}
+                    {/* ==================================================
+                        INTERVIEW TYPE
+                    ================================================== */}
 
                     <div>
 
@@ -465,6 +509,7 @@ const MockInterviews = () => {
                             Interview Type
 
                         </label>
+
 
                         <select
                             id="interview-type"
@@ -480,16 +525,9 @@ const MockInterviews = () => {
                                 Technical
                             </option>
 
+
                             <option value="hr">
                                 HR
-                            </option>
-
-                            <option value="behavioral">
-                                Behavioral
-                            </option>
-
-                            <option value="mixed">
-                                Mixed
                             </option>
 
                         </select>
@@ -497,7 +535,9 @@ const MockInterviews = () => {
                     </div>
 
 
-                    {/* DIFFICULTY */}
+                    {/* ==================================================
+                        DIFFICULTY
+                    ================================================== */}
 
                     <div>
 
@@ -506,6 +546,7 @@ const MockInterviews = () => {
                             Difficulty
 
                         </label>
+
 
                         <select
                             id="difficulty"
@@ -521,9 +562,11 @@ const MockInterviews = () => {
                                 Easy
                             </option>
 
+
                             <option value="medium">
                                 Medium
                             </option>
+
 
                             <option value="hard">
                                 Hard
@@ -534,7 +577,9 @@ const MockInterviews = () => {
                     </div>
 
 
-                    {/* TOTAL QUESTIONS */}
+                    {/* ==================================================
+                        TOTAL QUESTIONS
+                    ================================================== */}
 
                     <div>
 
@@ -543,6 +588,7 @@ const MockInterviews = () => {
                             Number of Questions
 
                         </label>
+
 
                         <select
                             id="total-questions"
@@ -560,16 +606,9 @@ const MockInterviews = () => {
                                 5 Questions
                             </option>
 
-                            <option value={10}>
-                                10 Questions
-                            </option>
 
-                            <option value={15}>
-                                15 Questions
-                            </option>
-
-                            <option value={20}>
-                                20 Questions
+                            <option value={6}>
+                                6 Questions
                             </option>
 
                         </select>
@@ -577,7 +616,9 @@ const MockInterviews = () => {
                     </div>
 
 
-                    {/* START */}
+                    {/* ==================================================
+                        START
+                    ================================================== */}
 
                     <div>
 
@@ -635,6 +676,7 @@ const MockInterviews = () => {
                             No mock interviews yet
                         </h3>
 
+
                         <p>
                             Start your first mock interview
                             to begin practicing.
@@ -654,11 +696,15 @@ const MockInterviews = () => {
                                     className="mock-interview-card"
                                 >
 
-                                    {/* HEADER */}
+
+                                    {/* ==================================================
+                                        HEADER
+                                    ================================================== */}
 
                                     <div>
 
                                         <h3>
+
                                             {interview.interview_type
                                                 ?.replace(
                                                     /\b\w/g,
@@ -666,20 +712,28 @@ const MockInterviews = () => {
                                                         character.toUpperCase()
                                                 )
                                             }{" "}
+
                                             Interview
+
                                         </h3>
 
+
                                         <p>
+
                                             Started{" "}
+
                                             {formatDate(
                                                 interview.started_at
                                             )}
+
                                         </p>
 
                                     </div>
 
 
-                                    {/* DETAILS */}
+                                    {/* ==================================================
+                                        DETAILS
+                                    ================================================== */}
 
                                     <div>
 
@@ -753,7 +807,9 @@ const MockInterviews = () => {
                                     </div>
 
 
-                                    {/* ACTIONS */}
+                                    {/* ==================================================
+                                        ACTIONS
+                                    ================================================== */}
 
                                     <div>
 
@@ -802,7 +858,9 @@ const MockInterviews = () => {
             </section>
 
         </div>
+
     );
+
 };
 
 

@@ -25,38 +25,68 @@ pwd_context = CryptContext(
 
 class AuthService:
 
+    # ========================================================
+    # REGISTER USER
+    # ========================================================
+
     def register_user(
         self,
         db: Session,
         request: UserRegisterRequest
     ):
 
-        # Check if email already exists
+        # ----------------------------------------------------
+        # CHECK IF EMAIL ALREADY EXISTS
+        # ----------------------------------------------------
+
         existing_user = user_repository.get_by_email(
             db,
             request.email
         )
 
         if existing_user:
+
             raise EmailAlreadyExistsException()
 
-        # Hash password
+
+        # ----------------------------------------------------
+        # HASH PASSWORD
+        # ----------------------------------------------------
+
         hashed_password = pwd_context.hash(
             request.password
         )
 
-        # Create User object
+
+        # ----------------------------------------------------
+        # CREATE USER
+        # ----------------------------------------------------
+
         user = User(
+
             full_name=request.full_name,
+
             email=request.email,
-            password_hash=hashed_password
+
+            password_hash=hashed_password,
+
+            role=request.role
         )
 
-        # Save user to database
+
+        # ----------------------------------------------------
+        # SAVE USER
+        # ----------------------------------------------------
+
         return user_repository.create(
             db,
             user
         )
+
+
+    # ========================================================
+    # LOGIN USER
+    # ========================================================
 
     def login_user(
         self,
@@ -65,38 +95,59 @@ class AuthService:
         password: str,
     ) -> TokenResponse:
 
-        # Find user by email
+        # ----------------------------------------------------
+        # FIND USER
+        # ----------------------------------------------------
+
         user = user_repository.get_by_email(
             db,
             email
         )
 
-        # Check if user exists
+
         if not user:
+
             raise ValueError(
                 "Invalid email or password"
             )
 
-        # Verify password
+
+        # ----------------------------------------------------
+        # VERIFY PASSWORD
+        # ----------------------------------------------------
+
         if not pwd_context.verify(
             password,
             user.password_hash
         ):
+
             raise ValueError(
                 "Invalid email or password"
             )
 
-        # Generate JWT Token
+
+        # ----------------------------------------------------
+        # GENERATE JWT TOKEN
+        # ----------------------------------------------------
+
         access_token = create_access_token(
+
             data={
                 "sub": user.email,
                 "user_id": user.id,
             }
+
         )
 
-        # Return token
+
+        # ----------------------------------------------------
+        # RETURN TOKEN
+        # ----------------------------------------------------
+
         return TokenResponse(
+
             access_token=access_token,
+
             token_type="bearer"
         )
 

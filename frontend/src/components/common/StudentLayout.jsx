@@ -36,6 +36,11 @@ function StudentLayout() {
 
             <aside className="student-sidebar">
 
+
+                {/* ==================================================
+                    BRAND
+                ================================================== */}
+
                 <div className="student-brand">
 
                     <h2>
@@ -55,8 +60,14 @@ function StudentLayout() {
 
                 <nav className="student-navigation">
 
+
+                    {/* ==================================================
+                        MAIN NAVIGATION
+                    ================================================== */}
+
                     <NavLink
                         to="/student/dashboard"
+                        end
                         className={({ isActive }) =>
                             isActive
                                 ? "nav-link active"
@@ -69,6 +80,7 @@ function StudentLayout() {
 
                     <NavLink
                         to="/student/jobs"
+                        end
                         className={({ isActive }) =>
                             isActive
                                 ? "nav-link active"
@@ -91,27 +103,109 @@ function StudentLayout() {
                     </NavLink>
 
 
-                    {/* Preparation */}
+                    {/* ==================================================
+                        PREPARATION NAVIGATION
+                        Section heading removed intentionally.
+                    ================================================== */}
 
-                    <div className="nav-section">
+                    {/* PREPARATION DASHBOARD */}
 
-                        <p>
-                            Preparation
-                        </p>
+                    <NavLink
+                        to="/student/preparation"
+                        end
+                        className={({ isActive }) =>
+                            isActive
+                                ? "nav-link active"
+                                : "nav-link"
+                        }
+                    >
+                        Preparation Dashboard
+                    </NavLink>
 
 
-                        <NavLink
-                            to="/student/preparation"
-                            className={({ isActive }) =>
-                                isActive
-                                    ? "nav-link active"
-                                    : "nav-link"
-                            }
-                        >
-                            Preparation Dashboard
-                        </NavLink>
+                    {/* DSA */}
 
-                    </div>
+                    <NavLink
+                        to="/student/preparation/dsa"
+                        className={({ isActive }) =>
+                            isActive
+                                ? "nav-link active"
+                                : "nav-link"
+                        }
+                    >
+                        DSA Preparation
+                    </NavLink>
+
+
+                    {/* SQL */}
+
+                    <NavLink
+                        to="/student/preparation/sql"
+                        className={({ isActive }) =>
+                            isActive
+                                ? "nav-link active"
+                                : "nav-link"
+                        }
+                    >
+                        SQL Preparation
+                    </NavLink>
+
+
+                    {/* CORE CS */}
+
+                    <NavLink
+                        to="/student/preparation/core-cs"
+                        className={({ isActive }) =>
+                            isActive
+                                ? "nav-link active"
+                                : "nav-link"
+                        }
+                    >
+                        Core CS Preparation
+                    </NavLink>
+
+
+                    {/* APTITUDE */}
+
+                    <NavLink
+                        to="/student/preparation/aptitude"
+                        className={({ isActive }) =>
+                            isActive
+                                ? "nav-link active"
+                                : "nav-link"
+                        }
+                    >
+                        Aptitude Preparation
+                    </NavLink>
+
+
+                    {/* MOCK INTERVIEWS */}
+
+                    <NavLink
+                        to="/student/preparation/mock-interviews"
+                        className={({ isActive }) =>
+                            isActive
+                                ? "nav-link active"
+                                : "nav-link"
+                        }
+                    >
+                        Mock Interviews
+                    </NavLink>
+
+
+                    {/* AI MENTOR */}
+
+                    <NavLink
+                        to="/student/preparation/ai-mentor"
+                        className={({ isActive }) =>
+                            isActive
+                                ? "nav-link active"
+                                : "nav-link"
+                        }
+                    >
+                        AI Mentor
+                    </NavLink>
+
 
                 </nav>
 
@@ -144,6 +238,7 @@ function StudentLayout() {
 
                 </div>
 
+
             </aside>
 
 
@@ -156,6 +251,7 @@ function StudentLayout() {
                 <Outlet />
 
             </main>
+
 
         </div>
     );

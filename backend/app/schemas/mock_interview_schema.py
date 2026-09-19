@@ -182,6 +182,35 @@ class MockInterviewListResponse(BaseModel):
 
 
 # ============================================================
+# RECENT INTERVIEW ANALYTICS ITEM
+# ============================================================
+
+class MockInterviewRecentItem(BaseModel):
+
+    id: int
+
+    interview_type: str
+
+    difficulty: str
+
+    status: str
+
+    total_questions: int
+
+    questions_answered: int
+
+    score: int | None = None
+
+    started_at: datetime
+
+    completed_at: datetime | None = None
+
+
+# ============================================================
+# MOCK INTERVIEW PERFORMANCE ANALYTICS RESPONSE
+# ============================================================
+
+# ============================================================
 # MOCK INTERVIEW PERFORMANCE ANALYTICS RESPONSE
 # ============================================================
 
@@ -193,18 +222,20 @@ class MockInterviewPerformanceAnalyticsResponse(BaseModel):
 
     in_progress_interviews: int
 
-    average_score: int | None = None
+    average_score: float | None = None
 
-    highest_score: int | None = None
+    best_score: float | None = None
 
     total_questions: int
 
-    questions_answered: int
+    total_questions_answered: int
 
-    completion_rate: int
+    answer_rate: float
 
-    interview_completion_rate: int
+    completion_rate: float
 
-    technical_average_score: int | None = None
+    technical_average_score: float | None = None
 
-    hr_average_score: int | None = None
+    hr_average_score: float | None = None
+
+    recent_interviews: list[dict] = []
