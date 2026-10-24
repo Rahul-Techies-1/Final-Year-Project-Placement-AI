@@ -34,8 +34,13 @@ class AIMentorService:
         # ----------------------------------------------------
         # ChromaDB persistent storage
         # ----------------------------------------------------
+        import os
 
-        self.chroma_path = Path("chroma_db")
+        if os.getenv("VERCEL") == "1":
+            self.chroma_path = Path("/tmp/chroma_db")
+        else:
+            self.chroma_path = Path(__file__).resolve().parents[2] / "chroma_db"
+
 
         self.chroma_path.mkdir(
             parents=True,
