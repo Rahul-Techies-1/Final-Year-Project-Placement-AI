@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { getDSAOverview } from "../../services/PreparationService";
+import { getDSAOverview } from "../../services/preparationService";
 import { getSQLOverview } from "../../services/sqlService";
 import { getAptitudeOverview } from "../../services/aptitudeService";
 import { getCoreCSOverview } from "../../services/coreCSService";
