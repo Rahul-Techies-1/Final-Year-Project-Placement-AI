@@ -18,5 +18,4 @@ huggingface_hub
 
 pypdf
 chromadb
-sentence-transformers
 email-validator
