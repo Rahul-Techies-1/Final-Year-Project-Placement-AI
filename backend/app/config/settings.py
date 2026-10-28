@@ -46,7 +46,7 @@ class Settings(BaseSettings):
     # CORS (comma separated list of deployed frontend URLs)
     # ========================================================
 
-    FRONTEND_URL: str = ""
+    FRONTEND_URL: str 
 
 
     # ========================================================

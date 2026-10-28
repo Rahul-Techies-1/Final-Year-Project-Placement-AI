@@ -41,22 +41,30 @@ from app.routers.aptitude_router import (
 from app.routers.mock_interview_router import router as mock_interview_router
 from app.routers.ai_mentor_router import router as ai_mentor_router
 
+import os 
+from dotenv import load_dotenv
+
 
 app = FastAPI(
     title="PlacementAI API",
     version="1.0.0",
 )
 
+
+
 def _build_allowed_origins() -> list[str]:
     origins = [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
     ]
+
     for url in settings.FRONTEND_URL.split(","):
         url = url.strip().rstrip("/")
         if url and url not in origins:
             origins.append(url)
+
     return origins
+
 
 
 app.add_middleware(
