@@ -20,3 +20,8 @@ __pycache__/
 # OS Files
 .DS_Store
 Thumbs.db
+
+# Local vector DB / uploads (not used any more)
+chroma_db/
+temp_uploads/
+venv/

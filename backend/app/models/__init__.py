@@ -44,3 +44,4 @@ from .ai_document import AIDocument
 
 from .ai_chat_session import AIChatSession
 from .ai_chat_message import AIChatMessage
+from .ai_document_chunk import AIDocumentChunk

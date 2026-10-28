@@ -10,13 +10,11 @@ pydantic-settings
 
 python-jose[cryptography]
 passlib[bcrypt]
-bcrypt
+bcrypt==4.0.1
 
 python-multipart
+email-validator
 
 huggingface_hub
-
+numpy
 pypdf
-chromadb
-email-validator
-sentence-transformers

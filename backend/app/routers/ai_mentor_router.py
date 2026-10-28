@@ -96,6 +96,7 @@ def ask_ai_mentor(
         result = (
             ai_mentor_service
             .ask_question(
+                db=db,
                 student_id=current_user.id,
                 question=request.question,
                 session_id=request.session_id,

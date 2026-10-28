@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.config.settings import settings
+
 from app.exceptions.custom_exceptions import EmailAlreadyExistsException
 from app.exceptions.handlers import email_exists_handler
 
@@ -45,12 +47,21 @@ app = FastAPI(
     version="1.0.0",
 )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
+def _build_allowed_origins() -> list[str]:
+    origins = [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
-    ],
+    ]
+    for url in settings.FRONTEND_URL.split(","):
+        url = url.strip().rstrip("/")
+        if url and url not in origins:
+            origins.append(url)
+    return origins
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_build_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -106,3 +117,8 @@ def root():
     return {
         "message": "PlacementAI Backend Running 🚀"
     }
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}

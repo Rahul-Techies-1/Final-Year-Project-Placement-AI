@@ -1,26 +1,23 @@
+import io
+import math
 import re
 import uuid
-from pathlib import Path
 from typing import Any
 
-from sqlalchemy.orm import Session
-
-from app.repositories.ai_document_repository import (
-    ai_document_repository
-)
-from app.repositories.ai_chat_repository import (
-    ai_chat_repository
-)
-
-import chromadb
-from chromadb.utils.embedding_functions import (
-    SentenceTransformerEmbeddingFunction,
-)
+import numpy as np
 from fastapi import UploadFile
 from huggingface_hub import InferenceClient
 from pypdf import PdfReader
+from sqlalchemy.orm import Session
 
 from app.config.settings import settings
+from app.models.ai_document_chunk import AIDocumentChunk
+from app.repositories.ai_chat_repository import (
+    ai_chat_repository
+)
+from app.repositories.ai_document_repository import (
+    ai_document_repository
+)
 
 
 class AIMentorService:
@@ -32,37 +29,7 @@ class AIMentorService:
     def __init__(self):
 
         # ----------------------------------------------------
-        # ChromaDB persistent storage
-        # ----------------------------------------------------
-        import os
-
-        if os.getenv("VERCEL") == "1":
-            self.chroma_path = Path("/tmp/chroma_db")
-        else:
-            self.chroma_path = Path(__file__).resolve().parents[2] / "chroma_db"
-
-
-        self.chroma_path.mkdir(
-            parents=True,
-            exist_ok=True
-        )
-
-        self.chroma_client = chromadb.PersistentClient(
-            path=str(self.chroma_path)
-        )
-
-        # ----------------------------------------------------
-        # Embedding model
-        # ----------------------------------------------------
-
-        self.embedding_function = (
-            SentenceTransformerEmbeddingFunction(
-                model_name="all-MiniLM-L6-v2"
-            )
-        )
-
-        # ----------------------------------------------------
-        # Hugging Face LLM
+        # Hugging Face LLM (chat)
         # ----------------------------------------------------
 
         self.llm_client = InferenceClient(
@@ -72,32 +39,150 @@ class AIMentorService:
 
         self.model = settings.HF_MODEL
 
+        # ----------------------------------------------------
+        # Hugging Face embeddings (runs on HF servers,
+        # nothing heavy is loaded in this process)
+        # ----------------------------------------------------
+
+        self.embed_client = InferenceClient(
+            provider="hf-inference",
+            api_key=settings.HF_TOKEN
+        )
+
+        self.embedding_model = (
+            "sentence-transformers/all-MiniLM-L6-v2"
+        )
+
     # ========================================================
-    # GET USER COLLECTION
+    # EMBEDDINGS
     # ========================================================
 
-    def _get_user_collection(
+    def _embed_one(self, text: str) -> list[float]:
+
+        out = np.asarray(
+            self.embed_client.feature_extraction(
+                text,
+                model=self.embedding_model
+            ),
+            dtype=float
+        )
+
+        # token-level output -> mean pool
+        while out.ndim > 1:
+            out = out.mean(axis=0)
+
+        return out.tolist()
+
+    def _embed_many(
         self,
-        student_id: int
-    ):
+        texts: list[str]
+    ) -> list[list[float]] | None:
+        """
+        Returns one vector per text, or None if the
+        embedding API is unavailable (keyword search
+        fallback is used in that case).
+        """
 
-        collection_name = (
-            f"student_{student_id}_documents"
-        )
+        try:
 
-        return self.chroma_client.get_or_create_collection(
+            return [
+                self._embed_one(text[:2000])
+                for text in texts
+            ]
 
-            name=collection_name,
+        except Exception as exc:
 
-            embedding_function=self.embedding_function,
+            print("Embedding API unavailable:", exc)
 
-            metadata={
-                "description": (
-                    f"PlacementAI AI Mentor documents "
-                    f"for student {student_id}"
+            return None
+
+    # ========================================================
+    # KEYWORD FALLBACK
+    # ========================================================
+
+    @staticmethod
+    def _tokens(text: str) -> list[str]:
+
+        return [
+            word
+            for word in re.findall(r"[a-z0-9]+", text.lower())
+            if len(word) > 2
+        ]
+
+    def _keyword_rank(
+        self,
+        question: str,
+        rows: list[AIDocumentChunk],
+        top_k: int = 4
+    ) -> list[AIDocumentChunk]:
+
+        query_words = set(self._tokens(question))
+
+        scored = []
+
+        for row in rows:
+
+            words = self._tokens(row.content)
+
+            if not words:
+                continue
+
+            hits = sum(
+                1 for word in words if word in query_words
+            )
+
+            scored.append(
+                (hits / math.sqrt(len(words)), row)
+            )
+
+        scored.sort(key=lambda pair: pair[0], reverse=True)
+
+        return [row for _, row in scored[:top_k]]
+
+    def _rank_chunks(
+        self,
+        question: str,
+        rows: list[AIDocumentChunk],
+        top_k: int = 4
+    ) -> list[AIDocumentChunk]:
+
+        if all(row.embedding for row in rows):
+
+            try:
+
+                query_vec = np.asarray(
+                    self._embed_one(question),
+                    dtype=float
                 )
-            }
-        )
+
+                matrix = np.asarray(
+                    [row.embedding for row in rows],
+                    dtype=float
+                )
+
+                query_vec = query_vec / (
+                    np.linalg.norm(query_vec) or 1.0
+                )
+
+                matrix = matrix / np.clip(
+                    np.linalg.norm(
+                        matrix, axis=1, keepdims=True
+                    ),
+                    1e-12,
+                    None
+                )
+
+                scores = matrix @ query_vec
+
+                order = np.argsort(scores)[::-1][:top_k]
+
+                return [rows[int(i)] for i in order]
+
+            except Exception as exc:
+
+                print("Vector search failed:", exc)
+
+        return self._keyword_rank(question, rows, top_k)
 
     # ========================================================
     # CLEAN TEXT
@@ -178,67 +263,43 @@ class AIMentorService:
                 "Uploaded PDF is empty."
             )
 
-        temp_directory = Path(
-            "temp_uploads"
-        )
-
-        temp_directory.mkdir(
-            parents=True,
-            exist_ok=True
-        )
-
-        temp_file = (
-            temp_directory /
-            f"temp_{file.filename}"
-        )
-
         try:
 
-            temp_file.write_bytes(
-                contents
+            reader = PdfReader(io.BytesIO(contents))
+
+        except Exception:
+
+            raise ValueError(
+                "The uploaded file is not a valid PDF."
             )
 
-            reader = PdfReader(
-                str(temp_file)
+        pages_text = []
+
+        for page in reader.pages:
+
+            page_text = (
+                page.extract_text()
+                or ""
             )
 
-            pages_text = []
+            if page_text.strip():
 
-            for page in reader.pages:
-
-                page_text = (
-                    page.extract_text()
-                    or ""
+                pages_text.append(
+                    page_text
                 )
 
-                if page_text.strip():
+        text = self._clean_text(
+            "\n".join(pages_text)
+        )
 
-                    pages_text.append(
-                        page_text
-                    )
+        if not text:
 
-            text = "\n".join(
-                pages_text
+            raise ValueError(
+                "No readable text was found "
+                "inside the PDF."
             )
 
-            text = self._clean_text(
-                text
-            )
-
-            if not text:
-
-                raise ValueError(
-                    "No readable text was found "
-                    "inside the PDF."
-                )
-
-            return text
-
-        finally:
-
-            if temp_file.exists():
-
-                temp_file.unlink()
+        return text
 
     # ========================================================
     # UPLOAD PDF
@@ -292,63 +353,19 @@ class AIMentorService:
             )
 
         # ----------------------------------------------------
-        # Get student's Chroma collection
-        # ----------------------------------------------------
-
-        collection = (
-            self._get_user_collection(
-                student_id
-            )
-        )
-
-        # ----------------------------------------------------
         # Generate unique document ID
         # ----------------------------------------------------
 
-        document_uuid = uuid.uuid4().hex
-
         document_id = (
             f"student_{student_id}_"
-            f"document_{document_uuid}"
+            f"document_{uuid.uuid4().hex}"
         )
 
         # ----------------------------------------------------
-        # Create chunk IDs
+        # Create embeddings (None -> keyword fallback)
         # ----------------------------------------------------
 
-        chunk_ids = [
-
-            f"{document_id}_chunk_{index}"
-
-            for index in range(
-                len(chunks)
-            )
-        ]
-
-        # ----------------------------------------------------
-        # Store chunks in ChromaDB
-        # ----------------------------------------------------
-
-        collection.add(
-
-            ids=chunk_ids,
-
-            documents=chunks,
-
-            metadatas=[
-
-                {
-                    "student_id": student_id,
-                    "document_id": document_id,
-                    "filename": filename,
-                    "chunk_index": index
-                }
-
-                for index in range(
-                    len(chunks)
-                )
-            ]
-        )
+        embeddings = self._embed_many(chunks)
 
         # ----------------------------------------------------
         # Create PostgreSQL document record
@@ -361,9 +378,33 @@ class AIMentorService:
                 user_id=student_id,
                 original_filename=filename,
                 stored_filename=document_id,
-                file_path="chroma_db",
+                file_path="postgres",
             )
         )
+
+        # ----------------------------------------------------
+        # Store chunks in PostgreSQL
+        # ----------------------------------------------------
+
+        db.add_all([
+
+            AIDocumentChunk(
+                document_id=document.id,
+                user_id=student_id,
+                filename=filename,
+                chunk_index=index,
+                content=chunk,
+                embedding=(
+                    embeddings[index]
+                    if embeddings
+                    else None
+                ),
+            )
+
+            for index, chunk in enumerate(chunks)
+        ])
+
+        db.commit()
 
         # ----------------------------------------------------
         # Mark document as processed
@@ -433,16 +474,16 @@ class AIMentorService:
             chat_history = []
 
         # ----------------------------------------------------
-        # Get student's collection
+        # Load student's chunks
         # ----------------------------------------------------
 
-        collection = (
-            self._get_user_collection(
-                student_id
-            )
+        rows = (
+            db.query(AIDocumentChunk)
+            .filter(AIDocumentChunk.user_id == student_id)
+            .all()
         )
 
-        if collection.count() == 0:
+        if not rows:
 
             raise ValueError(
                 "No documents have been uploaded yet. "
@@ -486,28 +527,18 @@ class AIMentorService:
         # Retrieve relevant chunks
         # ----------------------------------------------------
 
-        results = collection.query(
-
-            query_texts=[
-                question
-            ],
-
-            n_results=4
+        top_rows = self._rank_chunks(
+            question,
+            rows,
+            top_k=4
         )
 
-        documents = (
-            results.get(
-                "documents",
-                [[]]
-            )[0]
-        )
+        documents = [row.content for row in top_rows]
 
-        metadatas = (
-            results.get(
-                "metadatas",
-                [[]]
-            )[0]
-        )
+        metadatas = [
+            {"filename": row.filename}
+            for row in top_rows
+        ]
 
         if not documents:
 
@@ -806,33 +837,15 @@ do not contain enough information.
             )
 
         # ----------------------------------------------------
-        # Get student's Chroma collection
+        # Delete document chunks
         # ----------------------------------------------------
 
-        collection = (
-            self._get_user_collection(
-                student_id
-            )
-        )
+        db.query(AIDocumentChunk).filter(
+            AIDocumentChunk.document_id == document.id,
+            AIDocumentChunk.user_id == student_id,
+        ).delete(synchronize_session=False)
 
-        # ----------------------------------------------------
-        # Delete document chunks from ChromaDB
-        # ----------------------------------------------------
-
-        try:
-
-            collection.delete(
-                where={
-                    "document_id": document.stored_filename
-                }
-            )
-
-        except Exception as exc:
-
-            print(
-                "ChromaDB document deletion warning:",
-                exc
-            )
+        db.commit()
 
         # ----------------------------------------------------
         # Delete PostgreSQL document record
