@@ -56,6 +56,8 @@ def _build_allowed_origins() -> list[str]:
     origins = [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+        "https://final-year-project-placement-ai.vercel.app",
+        
     ]
 
     for url in settings.FRONTEND_URL.split(","):
