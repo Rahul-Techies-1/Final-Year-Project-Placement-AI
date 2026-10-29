@@ -18,6 +18,7 @@
   - [Frontend Setup](#frontend-setup)
 - [Database Migrations & Seeding](#database-migrations--seeding)
 - [Environment Configuration](#environment-configuration)
+- [Deployment](#-deployment)
 - [API Endpoints Overview](#api-endpoints-overview)
 
 ---
@@ -220,6 +221,62 @@ Placement AI/
    npm run dev
    ```
    The application will be running at: `http://localhost:5173`
+
+---
+
+## 🚢 Deployment (Backend & Frontend Separate)
+
+The project is deployed as **two completely separate services**:
+
+```
+┌──────────────────────┐         REST          ┌──────────────────────┐
+│   Frontend (Vercel)   │  ─────────────────▶ │   Backend (Render)   │
+│   React + Vite SPA    │                      │   FastAPI            │
+└──────────────────────┘                      └──────────┬───────────┘
+                                                          │
+                                                 ┌─────────▼───────────┐
+                                                 │    PostgreSQL       │
+                                                 └────────────────────┘
+```
+
+> Frontend and backend are deployed **independently**.
+> - **Frontend** → Vercel (static SPA)
+> - **Backend** → Render (Python web service)
+
+### Frontend → Vercel
+
+- **Root Directory**: `frontend`
+- **Framework Preset**: `Vite`
+- **Build Command**: `npm run build`
+- **Output Directory**: `dist`
+- **SPA Rewrite**: all routes → `/index.html` (already in `frontend/vercel.json`)
+
+**Required Environment Variable (build-time)**:
+
+| Key | Value |
+| :--- | :--- |
+| `VITE_API_URL` | Your production backend URL, e.g. `https://placement-ai-backend.onrender.com` |
+
+### Backend → Render
+
+- **Runtime**: Python (native)
+- **Root Directory**: `backend`
+- **Build Command**: `pip install -r requirements.txt`
+- **Start Command**: runs database migrations (`alembic upgrade head`) then starts the API server (`uvicorn`)
+- **Health Check Path**: `/health`
+- **Docker alternative**: a valid `backend/Dockerfile` is also provided (`python:3.11-slim`, migrations-on-start) if you prefer container deploys.
+
+**Required Environment Variables** (set in Render dashboard / `render.yaml` with `sync: false`):
+
+| Key | Secret | Description |
+| :--- | :--- | :--- |
+| `DATABASE_URL` | 🔑 Yes | PostgreSQL connection string |
+| `SECRET_KEY` | 🔑 Yes | JWT signing secret |
+| `HF_TOKEN` | 🔑 Yes | Hugging Face API token |
+| `HF_MODEL` | 🔑 Yes | Hugging Face model ID |
+| `FRONTEND_URL` | 🔑 Yes | Frontend origin, e.g. `https://final-year-project-placement-ai.vercel.app` |
+| `ALGORITHM` | No | JWT algorithm (default `HS256`) |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | No | Token expiry (default `60`) |
 
 ---
 

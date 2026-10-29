@@ -7,4 +7,6 @@ engine = create_engine(
     echo=False,
     pool_pre_ping=True,
     pool_recycle=300,
+    pool_size=3,
+    max_overflow=2,
 )
