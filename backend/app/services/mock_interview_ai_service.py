@@ -2,9 +2,8 @@ import json
 import re
 from typing import Any
 
-from huggingface_hub import InferenceClient
-
 from app.config.settings import settings
+from app.services.llm_client import get_llm_client
 
 
 class MockInterviewAIService:
@@ -15,12 +14,18 @@ class MockInterviewAIService:
 
     def __init__(self):
 
-        self.client = InferenceClient(
-            provider="auto",
-            api_key=settings.HF_TOKEN
-        )
+        self.client = None  # created lazily
 
-        self.model = settings.HF_MODEL
+        self.model = settings.LLM_MODEL
+
+
+    def _llm(self):
+
+        if self.client is None:
+
+            self.client = get_llm_client()
+
+        return self.client
 
 
     # ========================================================
@@ -160,7 +165,7 @@ Return ONLY JSON.
         try:
 
             response = (
-                self.client.chat.completions.create(
+                self._llm().chat.completions.create(
 
                     model=self.model,
 
@@ -175,7 +180,7 @@ Return ONLY JSON.
                         }
                     ],
 
-                    max_tokens=500,
+                    max_tokens=800,
 
                     temperature=0.2
                 )

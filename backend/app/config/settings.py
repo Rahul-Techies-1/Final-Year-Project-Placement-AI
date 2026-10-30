@@ -35,18 +35,29 @@ class Settings(BaseSettings):
 
 
     # ========================================================
-    # HUGGING FACE
+    # LLM (chat answers) - any OpenAI-compatible provider
+    # Default = Groq free tier. Gemini / OpenRouter also work.
     # ========================================================
 
-    HF_TOKEN: str
+    LLM_API_KEY: str = ""
 
-    HF_MODEL: str
+    LLM_BASE_URL: str = "https://api.groq.com/openai/v1"
+
+    LLM_MODEL: str = "llama-3.3-70b-versatile"
+
+    # ========================================================
+    # HUGGING FACE (only used for PDF embeddings now)
+    # ========================================================
+
+    HF_TOKEN: str = ""
+
+    HF_MODEL: str = ""   # not used any more, kept so old env files still load
 
     # ========================================================
     # CORS (comma separated list of deployed frontend URLs)
     # ========================================================
 
-    FRONTEND_URL: str 
+    FRONTEND_URL: str = ""
 
 
     # ========================================================

@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 
 from app.config.settings import settings
 from app.models.ai_document_chunk import AIDocumentChunk
+from app.services.llm_client import get_llm_client
 from app.repositories.ai_chat_repository import (
     ai_chat_repository
 )
@@ -32,12 +33,9 @@ class AIMentorService:
         # Hugging Face LLM (chat)
         # ----------------------------------------------------
 
-        self.llm_client = InferenceClient(
-            provider="auto",
-            api_key=settings.HF_TOKEN
-        )
+        self.llm_client = None  # created lazily (see _llm)
 
-        self.model = settings.HF_MODEL
+        self.model = settings.LLM_MODEL
 
         # ----------------------------------------------------
         # Hugging Face embeddings (runs on HF servers,
@@ -52,6 +50,14 @@ class AIMentorService:
         self.embedding_model = (
             "sentence-transformers/all-MiniLM-L6-v2"
         )
+
+    def _llm(self):
+
+        if self.llm_client is None:
+
+            self.llm_client = get_llm_client()
+
+        return self.llm_client
 
     # ========================================================
     # EMBEDDINGS
@@ -667,7 +673,7 @@ do not contain enough information.
         try:
 
             response = (
-                self.llm_client
+                self._llm()
                 .chat
                 .completions
                 .create(
@@ -688,7 +694,7 @@ do not contain enough information.
 
                     ],
 
-                    max_tokens=700,
+                    max_tokens=1200,
 
                     temperature=0.2
                 )

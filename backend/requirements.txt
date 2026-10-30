@@ -18,3 +18,4 @@ email-validator
 huggingface_hub
 numpy
 pypdf
+openai
